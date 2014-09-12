@@ -39,7 +39,10 @@ options:
   {{$flag.Format "\t"}}{{end}}
 `
 
-var Help = PrintHelp
+var (
+	Help    = PrintHelp
+	MetaVar = FormatMetaVar
+)
 
 func PrintHelp(ctx *Context) error {
 	t := template.New("help")
@@ -60,7 +63,7 @@ func flags(fs *FlagSet) []*Flag {
 	return flags
 }
 
-var MetaVar = func(f *Flag) string {
+func FormatMetaVar(f *Flag) string {
 	if f.MetaVar != "" {
 		return f.MetaVar
 	}
