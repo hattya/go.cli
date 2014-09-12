@@ -1,6 +1,8 @@
 go.cli
 ======
 
+A command line interface framework
+
 
 Install
 -------
