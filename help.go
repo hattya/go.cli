@@ -27,12 +27,13 @@
 package cli
 
 import (
+	"bytes"
 	"fmt"
 	"text/tabwriter"
 	"text/template"
 )
 
-const helpTmpl = `usage: {{.Name}}{{if .Usage}} {{.Usage}}{{end}}
+const helpTmpl = `{{range usage .}}{{.}}{{end}}
 {{range $i, $flag := flags .Flags}}{{if eq $i 0 }}
 options:
 {{end}}
@@ -41,6 +42,7 @@ options:
 
 var (
 	Help    = PrintHelp
+	Usage   = FormatUsage
 	MetaVar = FormatMetaVar
 )
 
@@ -48,6 +50,7 @@ func PrintHelp(ctx *Context) error {
 	t := template.New("help")
 	t.Funcs(template.FuncMap{
 		"flags": flags,
+		"usage": Usage,
 	})
 	template.Must(t.Parse(helpTmpl))
 	w := tabwriter.NewWriter(ctx.CLI.Stdout, 0, 8, 4, ' ', 0)
@@ -61,6 +64,38 @@ func flags(fs *FlagSet) []*Flag {
 		flags = append(flags, f)
 	})
 	return flags
+}
+
+func FormatUsage(cli *CLI) []string {
+	var usage []string
+	switch v := cli.Usage.(type) {
+	case nil:
+		usage = []string{""}
+	case string:
+		usage = []string{v}
+	case []string:
+		usage = make([]string, len(v))
+		copy(usage, v)
+	default:
+		panic(fmt.Sprintf("unknown type '%T'", v))
+	}
+
+	var b bytes.Buffer
+	for i, s := range usage {
+		if i == 0 {
+			b.WriteString("usage: ")
+		} else {
+			b.WriteString("   or: ")
+		}
+		b.WriteString(cli.Name)
+		if s != "" {
+			b.WriteRune(' ')
+			b.WriteString(s)
+		}
+		usage[i] = b.String()
+		b.Reset()
+	}
+	return usage
 }
 
 func FormatMetaVar(f *Flag) string {

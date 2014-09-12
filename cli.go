@@ -36,7 +36,7 @@ import (
 type CLI struct {
 	Name    string
 	Version string
-	Usage   string
+	Usage   interface{}
 	Flags   *FlagSet
 	Action  func(*Context) error
 

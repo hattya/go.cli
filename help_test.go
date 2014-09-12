@@ -29,6 +29,7 @@ package cli_test
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/hattya/go.cli"
@@ -54,6 +55,35 @@ func TestHelp(t *testing.T) {
 	if g, e := b.String(), fmt.Sprintf(helpOut, c.Name); g != e {
 		t.Errorf("expected %q, got %q", e, g)
 	}
+}
+
+func TestUsage(t *testing.T) {
+	usage := func(c *cli.CLI) string {
+		return strings.Join(cli.Usage(c), "\n")
+	}
+	for _, tt := range []struct {
+		usage  interface{}
+		format string
+	}{
+		{nil, "usage: %s"},
+		{"<options>", "usage: %s <options>"},
+		{[]string{"", ""}, "usage: %[1]s\n   or: %[1]s"},
+	} {
+		c := cli.NewCLI()
+		c.Usage = tt.usage
+		if g, e := usage(c), fmt.Sprintf(tt.format, c.Name); g != e {
+			t.Errorf("output differ\nexpected: %q\n     got: %q", e, g)
+		}
+	}
+
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic")
+		}
+	}()
+	c := cli.NewCLI()
+	c.Usage = 1
+	cli.Usage(c)
 }
 
 func TestMetaVar(t *testing.T) {
