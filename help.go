@@ -99,11 +99,8 @@ func FormatUsage(cli *CLI) []string {
 }
 
 func FormatMetaVar(f *Flag) string {
-	if f.MetaVar != "" {
+	if f.IsBool() || f.MetaVar != "" {
 		return f.MetaVar
-	}
-	if b, ok := f.Value.(boolFlag); ok && b.IsBoolFlag() {
-		return ""
 	}
 	s := f.Name[0]
 	for _, n := range f.Name {

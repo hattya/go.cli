@@ -44,6 +44,13 @@ type Flag struct {
 	MetaVar string
 }
 
+func (f *Flag) IsBool() bool {
+	if b, ok := f.Value.(boolFlag); ok {
+		return b.IsBoolFlag()
+	}
+	return false
+}
+
 func (f *Flag) Format(sep string) string {
 	var b bytes.Buffer
 	for i, n := range f.Name {
