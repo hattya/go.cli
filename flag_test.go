@@ -58,7 +58,6 @@ func TestFlagSet(t *testing.T) {
 	}
 
 	values := map[string]interface{}{
-		"var":      "var",
 		"bool":     true,
 		"duration": 1 * time.Millisecond,
 		"float64":  3.14,
@@ -67,9 +66,9 @@ func TestFlagSet(t *testing.T) {
 		"string":   "string",
 		"uint":     uint(1),
 		"uint64":   uint64(64),
+		"var":      "var",
 	}
 	environ := map[string]string{
-		envVar("var"):      "var",
 		envVar("bool"):     "true",
 		envVar("duration"): "1ms",
 		envVar("float64"):  "3.14",
@@ -78,6 +77,7 @@ func TestFlagSet(t *testing.T) {
 		envVar("string"):   "string",
 		envVar("uint"):     "1",
 		envVar("uint64"):   "64",
+		envVar("var"):      "var",
 	}
 	for k, v := range environ {
 		os.Setenv(k, v)
@@ -89,7 +89,6 @@ func TestFlagSet(t *testing.T) {
 	}()
 
 	flags := cli.NewFlagSet()
-	flags.VarEnv(envVar("var"), "var", &flagVar{}, "")
 	flags.BoolEnv(envVar("bool"), "bool", false, "")
 	flags.DurationEnv(envVar("duration"), "duration", 0, "")
 	flags.Float64Env(envVar("float64"), "float64", 0.0, "")
@@ -98,6 +97,7 @@ func TestFlagSet(t *testing.T) {
 	flags.StringEnv(envVar("string"), "string", "", "")
 	flags.UintEnv(envVar("uint"), "uint", 0, "")
 	flags.Uint64Env(envVar("uint64"), "uint64", 0, "")
+	flags.VarEnv(envVar("var"), "var", &flagVar{}, "")
 	for k, v := range values {
 		if g, e := get(flags, k), v; g != e {
 			t.Errorf("expected %v, got %v", e, g)

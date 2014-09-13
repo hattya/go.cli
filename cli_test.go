@@ -61,7 +61,7 @@ func TestCLI(t *testing.T) {
 	c.Flags.Uint64("uint64", 0, "")
 	args = strings.Fields("-bool -duration 1ms -float64 3.14 -int -1 -int64 -64 -string string -uint 1 -uint64 64 0 1")
 	if err := c.Run(args); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	ctx := cli.NewContext(c)
 	for i := 0; i < ctx.NArg(); i++ {

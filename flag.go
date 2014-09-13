@@ -84,9 +84,9 @@ type FlagSet struct {
 }
 
 func NewFlagSet() *FlagSet {
-	f := &FlagSet{vars: make(map[string]*Flag)}
-	f.fs.SetOutput(ioutil.Discard)
-	return f
+	fs := &FlagSet{vars: make(map[string]*Flag)}
+	fs.fs.SetOutput(ioutil.Discard)
+	return fs
 }
 
 func (fs *FlagSet) Parse(args []string) error { return fs.fs.Parse(args) }
@@ -102,10 +102,10 @@ func (fs *FlagSet) Visit(fn func(*Flag)) {
 	fs.fs.Visit(func(ff *flag.Flag) {
 		if _, ok := seen[ff.Name]; !ok {
 			f := fs.vars[ff.Name]
+			fn(f)
 			for _, n := range f.Name {
 				seen[n] = true
 			}
-			fn(f)
 		}
 	})
 }
@@ -115,10 +115,10 @@ func (fs *FlagSet) VisitAll(fn func(*Flag)) {
 	fs.fs.VisitAll(func(ff *flag.Flag) {
 		if _, ok := seen[ff.Name]; !ok {
 			f := fs.vars[ff.Name]
+			fn(f)
 			for _, n := range f.Name {
 				seen[n] = true
 			}
-			fn(f)
 		}
 	})
 }
@@ -138,19 +138,6 @@ func (fs *FlagSet) Args() []string { return fs.fs.Args() }
 func (fs *FlagSet) NArg() int { return fs.fs.NArg() }
 
 func (fs *FlagSet) Parsed() bool { return fs.fs.Parsed() }
-
-func (fs *FlagSet) Var(name string, value flag.Getter, usage string) {
-	fs.each(name, func(n string) {
-		fs.fs.Var(value, n, usage)
-	})
-}
-
-func (fs *FlagSet) VarEnv(envVar, name string, value flag.Getter, usage string) {
-	if s := os.Getenv(envVar); s != "" {
-		value.Set(s)
-	}
-	fs.Var(name, value, usage)
-}
 
 func (fs *FlagSet) Bool(name string, value bool, usage string) {
 	fs.each(name, func(n string) {
@@ -270,6 +257,19 @@ func (fs *FlagSet) Uint64Env(envVar, name string, value uint64, usage string) {
 	fs.Uint64(name, value, usage)
 }
 
+func (fs *FlagSet) Var(name string, value flag.Getter, usage string) {
+	fs.each(name, func(n string) {
+		fs.fs.Var(value, n, usage)
+	})
+}
+
+func (fs *FlagSet) VarEnv(envVar, name string, value flag.Getter, usage string) {
+	if s := os.Getenv(envVar); s != "" {
+		value.Set(s)
+	}
+	fs.Var(name, value, usage)
+}
+
 func (fs *FlagSet) each(name string, fn func(string)) {
 	list := strings.Split(name, ",")
 	for i := 0; i < len(list); i++ {
@@ -278,7 +278,7 @@ func (fs *FlagSet) each(name string, fn func(string)) {
 		fn(n)
 	}
 
-	sort.Sort(flagNames(list))
+	sort.Sort(flagName(list))
 	f := &Flag{Name: list}
 	for i, n := range list {
 		ff := fs.fs.Lookup(n)
@@ -293,8 +293,8 @@ func (fs *FlagSet) each(name string, fn func(string)) {
 	fs.list = append(fs.list, f)
 }
 
-type flagNames []string
+type flagName []string
 
-func (p flagNames) Len() int           { return len(p) }
-func (p flagNames) Less(i, j int) bool { return len(p[i]) < len(p[j]) || p[i] < p[j] }
-func (p flagNames) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+func (p flagName) Len() int           { return len(p) }
+func (p flagName) Less(i, j int) bool { return len(p[i]) < len(p[j]) || p[i] < p[j] }
+func (p flagName) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
