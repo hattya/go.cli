@@ -54,7 +54,7 @@ func TestFlagSet(t *testing.T) {
 		return fmt.Sprintf("__CLI_%s__", strings.ToUpper(s))
 	}
 	get := func(flags *cli.FlagSet, name string) interface{} {
-		return flags.Lookup(name).Value.Get()
+		return flags.Lookup(name).Get()
 	}
 
 	values := map[string]interface{}{
@@ -151,7 +151,7 @@ func TestVisitFlags(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, s := range []string{"h", "help"} {
-		if g, e := flags.Lookup(s).Value.Get().(bool), true; g != e {
+		if g, e := flags.Lookup(s).Get().(bool), true; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	}

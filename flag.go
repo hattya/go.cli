@@ -29,10 +29,10 @@ package cli
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -40,12 +40,19 @@ import (
 type Flag struct {
 	Name    []string
 	Usage   string
-	Value   flag.Getter
+	Value   interface{}
 	MetaVar string
+	EnvVar  string
+
+	value flag.Getter
+}
+
+func (f *Flag) Get() interface{} {
+	return f.value.Get()
 }
 
 func (f *Flag) IsBool() bool {
-	if b, ok := f.Value.(boolFlag); ok {
+	if b, ok := f.value.(boolFlag); ok {
 		return b.IsBoolFlag()
 	}
 	return false
@@ -111,16 +118,19 @@ func (fs *FlagSet) Visit(fn func(*Flag)) {
 }
 
 func (fs *FlagSet) VisitAll(fn func(*Flag)) {
-	seen := make(map[string]bool)
-	fs.fs.VisitAll(func(ff *flag.Flag) {
-		if _, ok := seen[ff.Name]; !ok {
-			f := fs.vars[ff.Name]
-			fn(f)
-			for _, n := range f.Name {
-				seen[n] = true
-			}
-		}
-	})
+	list := make(sort.StringSlice, len(fs.list))
+	for i, f := range fs.list {
+		list[i] = f.Name[0]
+	}
+	sort.Sort(list)
+	flags := make([]*Flag, len(list))
+	for i, n := range list {
+		flags[i] = fs.vars[n]
+	}
+
+	for _, f := range flags {
+		fn(f)
+	}
 }
 
 func (fs *FlagSet) NFlag() int {
@@ -139,158 +149,147 @@ func (fs *FlagSet) NArg() int { return fs.fs.NArg() }
 
 func (fs *FlagSet) Parsed() bool { return fs.fs.Parsed() }
 
-func (fs *FlagSet) Bool(name string, value bool, usage string) {
-	fs.each(name, func(n string) {
-		fs.fs.Bool(n, value, usage)
-	})
+func (fs *FlagSet) Bool(name string, value bool, usage string) *Flag {
+	return fs.Var(name, value, usage)
 }
 
-func (fs *FlagSet) BoolEnv(envVar, name string, value bool, usage string) {
-	if s := os.Getenv(envVar); s != "" {
-		if v, err := strconv.ParseBool(s); err == nil {
-			value = v
-		}
-	}
-	fs.Bool(name, value, usage)
+func (fs *FlagSet) BoolEnv(envVar, name string, value bool, usage string) *Flag {
+	return fs.VarEnv(envVar, name, value, usage)
 }
 
-func (fs *FlagSet) Duration(name string, value time.Duration, usage string) {
-	fs.each(name, func(n string) {
-		fs.fs.Duration(n, value, usage)
-	})
+func (fs *FlagSet) Duration(name string, value time.Duration, usage string) *Flag {
+	return fs.Var(name, value, usage)
 }
 
-func (fs *FlagSet) DurationEnv(envVar, name string, value time.Duration, usage string) {
-	if s := os.Getenv(envVar); s != "" {
-		if d, err := time.ParseDuration(s); err == nil {
-			value = d
-		}
-	}
-	fs.Duration(name, value, usage)
+func (fs *FlagSet) DurationEnv(envVar, name string, value time.Duration, usage string) *Flag {
+	return fs.VarEnv(envVar, name, value, usage)
 }
 
-func (fs *FlagSet) Float64(name string, value float64, usage string) {
-	fs.each(name, func(n string) {
-		fs.fs.Float64(n, value, usage)
-	})
+func (fs *FlagSet) Float64(name string, value float64, usage string) *Flag {
+	return fs.Var(name, value, usage)
 }
 
-func (fs *FlagSet) Float64Env(envVar, name string, value float64, usage string) {
-	if s := os.Getenv(envVar); s != "" {
-		if f, err := strconv.ParseFloat(s, 64); err == nil {
-			value = f
-		}
-	}
-	fs.Float64(name, value, usage)
+func (fs *FlagSet) Float64Env(envVar, name string, value float64, usage string) *Flag {
+	return fs.VarEnv(envVar, name, value, usage)
 }
 
-func (fs *FlagSet) Int(name string, value int, usage string) {
-	fs.each(name, func(n string) {
-		fs.fs.Int(n, value, usage)
-	})
+func (fs *FlagSet) Int(name string, value int, usage string) *Flag {
+	return fs.Var(name, value, usage)
 }
 
-func (fs *FlagSet) IntEnv(envVar, name string, value int, usage string) {
-	if s := os.Getenv(envVar); s != "" {
-		if i, err := strconv.ParseInt(s, 10, 0); err == nil {
-			value = int(i)
-		}
-	}
-	fs.Int(name, value, usage)
+func (fs *FlagSet) IntEnv(envVar, name string, value int, usage string) *Flag {
+	return fs.VarEnv(envVar, name, value, usage)
 }
 
-func (fs *FlagSet) Int64(name string, value int64, usage string) {
-	fs.each(name, func(n string) {
-		fs.fs.Int64(n, value, usage)
-	})
+func (fs *FlagSet) Int64(name string, value int64, usage string) *Flag {
+	return fs.Var(name, value, usage)
 }
 
-func (fs *FlagSet) Int64Env(envVar, name string, value int64, usage string) {
-	if s := os.Getenv(envVar); s != "" {
-		if i, err := strconv.ParseInt(s, 10, 64); err == nil {
-			value = i
-		}
-	}
-	fs.Int64(name, value, usage)
+func (fs *FlagSet) Int64Env(envVar, name string, value int64, usage string) *Flag {
+	return fs.VarEnv(envVar, name, value, usage)
 }
 
-func (fs *FlagSet) String(name string, value string, usage string) {
-	fs.each(name, func(n string) {
-		fs.fs.String(n, value, usage)
-	})
+func (fs *FlagSet) String(name string, value string, usage string) *Flag {
+	return fs.Var(name, value, usage)
 }
 
-func (fs *FlagSet) StringEnv(envVar, name string, value string, usage string) {
-	if s := os.Getenv(envVar); s != "" {
-		value = s
-	}
-	fs.String(name, value, usage)
+func (fs *FlagSet) StringEnv(envVar, name string, value string, usage string) *Flag {
+	return fs.VarEnv(envVar, name, value, usage)
 }
 
-func (fs *FlagSet) Uint(name string, value uint, usage string) {
-	fs.each(name, func(n string) {
-		fs.fs.Uint(n, value, usage)
-	})
+func (fs *FlagSet) Uint(name string, value uint, usage string) *Flag {
+	return fs.Var(name, value, usage)
 }
 
-func (fs *FlagSet) UintEnv(envVar, name string, value uint, usage string) {
-	if s := os.Getenv(envVar); s != "" {
-		if n, err := strconv.ParseUint(s, 10, 0); err == nil {
-			value = uint(n)
-		}
-	}
-	fs.Uint(name, value, usage)
+func (fs *FlagSet) UintEnv(envVar, name string, value uint, usage string) *Flag {
+	return fs.VarEnv(envVar, name, value, usage)
 }
 
-func (fs *FlagSet) Uint64(name string, value uint64, usage string) {
-	fs.each(name, func(n string) {
-		fs.fs.Uint64(n, value, usage)
-	})
+func (fs *FlagSet) Uint64(name string, value uint64, usage string) *Flag {
+	return fs.Var(name, value, usage)
 }
 
-func (fs *FlagSet) Uint64Env(envVar, name string, value uint64, usage string) {
-	if s := os.Getenv(envVar); s != "" {
-		if n, err := strconv.ParseUint(s, 10, 64); err == nil {
-			value = n
-		}
-	}
-	fs.Uint64(name, value, usage)
+func (fs *FlagSet) Uint64Env(envVar, name string, value uint64, usage string) *Flag {
+	return fs.VarEnv(envVar, name, value, usage)
 }
 
-func (fs *FlagSet) Var(name string, value flag.Getter, usage string) {
-	fs.each(name, func(n string) {
-		fs.fs.Var(value, n, usage)
-	})
+func (fs *FlagSet) Var(name string, value interface{}, usage string) *Flag {
+	return fs.VarEnv("", name, value, usage)
 }
 
-func (fs *FlagSet) VarEnv(envVar, name string, value flag.Getter, usage string) {
-	if s := os.Getenv(envVar); s != "" {
-		value.Set(s)
-	}
-	fs.Var(name, value, usage)
-}
-
-func (fs *FlagSet) each(name string, fn func(string)) {
+func (fs *FlagSet) VarEnv(envVar, name string, value interface{}, usage string) *Flag {
 	list := strings.Split(name, ",")
-	for i := 0; i < len(list); i++ {
-		n := strings.TrimSpace(list[i])
-		list[i] = n
-		fn(n)
+	for i, s := range list {
+		list[i] = strings.TrimSpace(s)
 	}
-
 	sort.Sort(flagName(list))
-	f := &Flag{Name: list}
-	for i, n := range list {
-		ff := fs.fs.Lookup(n)
-		if i == 0 {
-			f.Usage = ff.Usage
-			f.Value = ff.Value.(flag.Getter)
-		} else {
-			ff.Value = f.Value
-		}
+
+	f := &Flag{
+		Name:   list,
+		Usage:  usage,
+		Value:  value,
+		EnvVar: envVar,
+	}
+	fs.Add(f)
+	return f
+}
+
+func (fs *FlagSet) Add(f *Flag) {
+	switch v := f.Value.(type) {
+	case bool:
+		fs.each(f, func(n string) {
+			fs.fs.BoolVar(&v, n, v, f.Usage)
+		})
+	case time.Duration:
+		fs.each(f, func(n string) {
+			fs.fs.DurationVar(&v, n, v, f.Usage)
+		})
+	case float64:
+		fs.each(f, func(n string) {
+			fs.fs.Float64Var(&v, n, v, f.Usage)
+		})
+	case int:
+		fs.each(f, func(n string) {
+			fs.fs.IntVar(&v, n, v, f.Usage)
+		})
+	case int64:
+		fs.each(f, func(n string) {
+			fs.fs.Int64Var(&v, n, v, f.Usage)
+		})
+	case string:
+		fs.each(f, func(n string) {
+			fs.fs.StringVar(&v, n, v, f.Usage)
+		})
+	case uint:
+		fs.each(f, func(n string) {
+			fs.fs.UintVar(&v, n, v, f.Usage)
+		})
+	case uint64:
+		fs.each(f, func(n string) {
+			fs.fs.Uint64Var(&v, n, v, f.Usage)
+		})
+	case flag.Getter:
+		fs.each(f, func(n string) {
+			fs.fs.Var(v, n, f.Usage)
+		})
+	default:
+		panic(fmt.Sprintf("unknown type '%T'", v))
+	}
+}
+
+func (fs *FlagSet) each(f *Flag, fn func(string)) {
+	for _, n := range f.Name {
+		fn(n)
 		fs.vars[n] = f
 	}
 	fs.list = append(fs.list, f)
+
+	f.value = fs.fs.Lookup(f.Name[0]).Value.(flag.Getter)
+	if f.EnvVar != "" {
+		if s := os.Getenv(f.EnvVar); s != "" {
+			f.value.Set(s)
+		}
+	}
 }
 
 type flagName []string
