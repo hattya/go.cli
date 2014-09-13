@@ -143,6 +143,17 @@ func TestFlagSet(t *testing.T) {
 	}
 }
 
+func TestFlagSetPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic")
+		}
+	}()
+
+	flags := cli.NewFlagSet()
+	flags.Var("", '\n', "")
+}
+
 func TestVisitFlags(t *testing.T) {
 	flags := cli.NewFlagSet()
 	flags.Bool("h, help", false, "")
