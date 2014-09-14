@@ -37,7 +37,10 @@ const helpTmpl = `{{range usage .}}{{.}}{{end}}
 {{range $i, $flag := flags .Flags}}{{if eq $i 0 }}
 options:
 {{end}}
-  {{$flag.Format "\t"}}{{end}}
+  {{$flag.Format "\t"}}{{end}}{{if .Epilog}}
+
+{{.Epilog}}
+{{end}}
 `
 
 var (
