@@ -37,24 +37,9 @@ import (
 	"github.com/hattya/go.cli"
 )
 
-type flagVar struct {
-	s string
-}
-
-func (f *flagVar) Set(v string) error {
-	f.s = v
-	return nil
-}
-
-func (f *flagVar) Get() interface{} { return f.s }
-func (f *flagVar) String() string   { return fmt.Sprintf("%s", f.s) }
-
 func TestFlagSet(t *testing.T) {
 	envVar := func(s string) string {
 		return fmt.Sprintf("__CLI_%s__", strings.ToUpper(s))
-	}
-	get := func(flags *cli.FlagSet, name string) interface{} {
-		return flags.Lookup(name).Get()
 	}
 
 	values := map[string]interface{}{
@@ -97,9 +82,9 @@ func TestFlagSet(t *testing.T) {
 	flags.StringEnv(envVar("string"), "string", "", "")
 	flags.UintEnv(envVar("uint"), "uint", 0, "")
 	flags.Uint64Env(envVar("uint64"), "uint64", 0, "")
-	flags.VarEnv(envVar("var"), "var", &flagVar{}, "")
+	flags.VarEnv(envVar("var"), "var", &value{}, "")
 	for k, v := range values {
-		if g, e := get(flags, k), v; g != e {
+		if g, e := flags.Lookup(k).Value.Get(), v; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	}
@@ -138,20 +123,33 @@ func TestFlagSet(t *testing.T) {
 	}
 
 	flags.Set("var", "set")
-	if g, e := get(flags, "var"), "set"; g != e {
+	if g, e := flags.Lookup("var").Value.Get(), "set"; g != e {
 		t.Errorf("expected %v, got %v", e, g)
 	}
 }
 
-func TestFlagSetPanic(t *testing.T) {
-	defer func() {
-		if r := recover(); r == nil {
-			t.Error("expected panic")
-		}
-	}()
+func TestAddFlags(t *testing.T) {
+	f := &cli.Flag{
+		Name:   []string{"var"},
+		Value:  &value{},
+		EnvVar: "__CLI_VAR__",
+	}
+
+	os.Setenv(f.EnvVar, "var")
+	defer os.Setenv(f.EnvVar, "")
 
 	flags := cli.NewFlagSet()
-	flags.Var("", '\n', "")
+	flags.Add(f)
+	if g, e := f.Value.Get(), "var"; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+	i := 0
+	flags.VisitAll(func(*cli.Flag) {
+		i++
+	})
+	if g, e := i, 1; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
 }
 
 func TestVisitFlags(t *testing.T) {
@@ -162,7 +160,7 @@ func TestVisitFlags(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, s := range []string{"h", "help"} {
-		if g, e := flags.Lookup(s).Get().(bool), true; g != e {
+		if g, e := flags.Lookup(s).Value.Get().(bool), true; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	}

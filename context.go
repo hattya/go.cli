@@ -44,7 +44,7 @@ func (c *Context) NArg() int { return c.CLI.Flags.NArg() }
 
 func (c *Context) Value(name string) interface{} {
 	if f := c.CLI.Flags.Lookup(name); f != nil {
-		return f.Get()
+		return f.Value.Get()
 	}
 	return nil
 }

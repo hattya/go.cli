@@ -60,7 +60,8 @@ func TestCLI(t *testing.T) {
 	c.Flags.String("string", "", "")
 	c.Flags.Uint("uint", 0, "")
 	c.Flags.Uint64("uint64", 0, "")
-	args = strings.Fields("-bool -duration 1ms -float64 3.14 -int -1 -int64 -64 -string string -uint 1 -uint64 64 0 1")
+	c.Flags.Var("var", &value{}, "")
+	args = strings.Fields("-bool -duration 1ms -float64 3.14 -int -1 -int64 -64 -string string -uint 1 -uint64 64 -var var 0 1")
 	if err := c.Run(args); err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +74,7 @@ func TestCLI(t *testing.T) {
 	if g, e := len(ctx.Args()), 2; g != e {
 		t.Errorf("expected %v, got %v", e, g)
 	}
-	if g := ctx.Value("var"); g != nil {
+	if g := ctx.Value(""); g != nil {
 		t.Errorf("expected %v, got %v", nil, g)
 	}
 	for _, tt := range []struct {
@@ -94,6 +95,9 @@ func TestCLI(t *testing.T) {
 		if g, e := rv[0].Interface(), tt.val; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
+	}
+	if g, e := ctx.Value("var"), "var"; g != e {
+		t.Errorf("expected %v, got %v", e, g)
 	}
 }
 
@@ -136,3 +140,15 @@ func testOut(g, e string) error {
 	}
 	return nil
 }
+
+type value struct {
+	s string
+}
+
+func (f *value) Set(v string) error {
+	f.s = v
+	return nil
+}
+
+func (f *value) Get() interface{} { return f.s }
+func (f *value) String() string   { return fmt.Sprintf("%s", f.s) }

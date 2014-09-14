@@ -139,7 +139,14 @@ func TestMetaVar(t *testing.T) {
 		n := list[len(list)-1]
 
 		flags := cli.NewFlagSet()
-		flags.Var(tt.name, tt.value, "")
+		switch v := tt.value.(type) {
+		case bool:
+			flags.Bool(tt.name, v, "")
+		case int:
+			flags.Int(tt.name, v, "")
+		case string:
+			flags.String(tt.name, v, "")
+		}
 		flags.MetaVar(n, tt.metaVar)
 		if g, e := cli.MetaVar(flags.Lookup(n)), tt.expected; g != e {
 			t.Errorf("expected %v, got %v", e, g)
