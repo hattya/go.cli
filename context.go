@@ -42,13 +42,6 @@ func (c *Context) Args() []string { return c.CLI.Flags.Args() }
 
 func (c *Context) NArg() int { return c.CLI.Flags.NArg() }
 
-func (c *Context) Value(name string) interface{} {
-	if f := c.CLI.Flags.Lookup(name); f != nil {
-		return f.Value.Get()
-	}
-	return nil
-}
-
 func (c *Context) Bool(name string) bool {
 	return c.Value(name).(bool)
 }
@@ -79,4 +72,11 @@ func (c *Context) Uint(name string) uint {
 
 func (c *Context) Uint64(name string) uint64 {
 	return c.Value(name).(uint64)
+}
+
+func (c *Context) Value(name string) interface{} {
+	if f := c.CLI.Flags.Lookup(name); f != nil {
+		return f.Value.Get()
+	}
+	return nil
 }
