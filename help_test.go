@@ -52,8 +52,8 @@ func TestHelp(t *testing.T) {
 	if err := c.Run(args); err != nil {
 		t.Fatal(err)
 	}
-	if g, e := b.String(), fmt.Sprintf(helpOut, c.Name); g != e {
-		t.Errorf("expected %q, got %q", e, g)
+	if err := testOut(b.String(), fmt.Sprintf(helpOut, c.Name)); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -81,8 +81,8 @@ func TestUsage(t *testing.T) {
 	for _, tt := range usageTests {
 		c := cli.NewCLI()
 		c.Usage = tt.usage
-		if g, e := strings.Join(cli.Usage(c), "\n"), fmt.Sprintf(tt.format, c.Name); g != e {
-			t.Errorf("output differ\nexpected: %q\n     got: %q", e, g)
+		if err := testOut(strings.Join(cli.Usage(c), "\n"), fmt.Sprintf(tt.format, c.Name)); err != nil {
+			t.Error(err)
 		}
 	}
 }

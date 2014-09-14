@@ -46,8 +46,8 @@ func TestVersion(t *testing.T) {
 	if err := c.Run(args); err != nil {
 		t.Fatal(err)
 	}
-	if g, e := b.String(), fmt.Sprintf(versionOut, c.Name, "unknown"); g != e {
-		t.Errorf("expected %q, got %q", e, g)
+	if err := testOut(b.String(), fmt.Sprintf(versionOut, c.Name, "unknown")); err != nil {
+		t.Error(err)
 	}
 
 	b.Reset()
@@ -57,7 +57,7 @@ func TestVersion(t *testing.T) {
 	if err := c.Run(args); err != nil {
 		t.Fatal(err)
 	}
-	if g, e := b.String(), fmt.Sprintf(versionOut, c.Name, c.Version); g != e {
-		t.Errorf("expected %q, got %q", e, g)
+	if err := testOut(b.String(), fmt.Sprintf(versionOut, c.Name, c.Version)); err != nil {
+		t.Error(err)
 	}
 }

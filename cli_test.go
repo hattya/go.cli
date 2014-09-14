@@ -29,6 +29,7 @@ package cli_test
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -96,7 +97,7 @@ func TestCLI(t *testing.T) {
 	}
 }
 
-func TestCLIOutput(t *testing.T) {
+func TestCLIOut(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	c := cli.NewCLI()
 	c.Stdout = &stdout
@@ -109,11 +110,11 @@ func TestCLIOutput(t *testing.T) {
 	c.Errorln("Errorln")
 	c.Errorf("Errorf")
 
-	if g, e := stdout.String(), "Print,Println\nPrintf"; g != e {
-		t.Errorf("expected %q, got %q", e, g)
+	if err := testOut(stdout.String(), "Print,Println\nPrintf"); err != nil {
+		t.Error(err)
 	}
-	if g, e := stderr.String(), "Error,Errorln\nErrorf"; g != e {
-		t.Errorf("expected %q, got %q", e, g)
+	if err := testOut(stderr.String(), "Error,Errorln\nErrorf"); err != nil {
+		t.Error(err)
 	}
 }
 
@@ -127,4 +128,11 @@ func TestError(t *testing.T) {
 	if g, e := err.Error(), "exit status 1: error"; g != e {
 		t.Errorf("expected %v, got %v", e, g)
 	}
+}
+
+func testOut(g, e string) error {
+	if g != e {
+		return fmt.Errorf("output differ\nexpected: %q\n     got: %q", e, g)
+	}
+	return nil
 }
