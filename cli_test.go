@@ -49,6 +49,12 @@ func TestCLI(t *testing.T) {
 		if g, e := err.Exit, 2; g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
+		if _, ok := err.Err.(cli.FlagError); !ok {
+			t.Errorf("expected cli.FlagError, got %T", err.Err)
+		}
+		if !strings.Contains(err.Err.Error(), "not defined") {
+			t.Error("unexpected error")
+		}
 	}
 
 	c = cli.NewCLI()

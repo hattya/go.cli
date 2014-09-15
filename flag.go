@@ -89,13 +89,20 @@ func NewFlagSet() *FlagSet {
 	return fs
 }
 
-func (fs *FlagSet) Parse(args []string) error { return fs.fs.Parse(args) }
+func (fs *FlagSet) Parse(args []string) error { return fs.error(fs.fs.Parse(args)) }
 
 func (fs *FlagSet) Lookup(name string) *Flag { return fs.vars[name] }
 
 func (fs *FlagSet) MetaVar(name, metaVar string) { fs.vars[name].MetaVar = metaVar }
 
-func (fs *FlagSet) Set(name, value string) error { return fs.fs.Set(name, value) }
+func (fs *FlagSet) Set(name, value string) error { return fs.error(fs.fs.Set(name, value)) }
+
+func (fs *FlagSet) error(err error) error {
+	if err != nil {
+		return FlagError(err.Error())
+	}
+	return nil
+}
 
 func (fs *FlagSet) Visit(fn func(*Flag)) {
 	seen := make(map[string]bool)
@@ -280,3 +287,7 @@ type flagName []string
 func (p flagName) Len() int           { return len(p) }
 func (p flagName) Less(i, j int) bool { return len(p[i]) < len(p[j]) || p[i] < p[j] }
 func (p flagName) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+type FlagError string
+
+func (e FlagError) Error() string { return string(e) }
