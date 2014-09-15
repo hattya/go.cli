@@ -37,6 +37,7 @@ type CLI struct {
 	Name    string
 	Version string
 	Usage   interface{}
+	Desc    string
 	Epilog  string
 	Flags   *FlagSet
 	Action  func(*Context) error
