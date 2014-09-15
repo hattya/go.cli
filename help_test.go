@@ -41,6 +41,7 @@ options:
 
   -h, --help    show help
   --version     show version information
+
 `
 
 func TestHelp(t *testing.T) {
