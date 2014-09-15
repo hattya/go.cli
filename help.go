@@ -49,7 +49,11 @@ var (
 	MetaVar = FormatMetaVar
 )
 
-func PrintHelp(ctx *Context) error {
+func PrintHelp(ctx *Context, err error) error {
+	if err != nil {
+		ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
+	}
+
 	t := template.New("help")
 	t.Funcs(template.FuncMap{
 		"flags": flags,

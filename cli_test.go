@@ -28,8 +28,8 @@ package cli_test
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 	"strconv"
 	"strings"
@@ -41,18 +41,16 @@ import (
 
 func TestCLI(t *testing.T) {
 	c := cli.NewCLI()
+	c.Stdout = ioutil.Discard
+	c.Stderr = ioutil.Discard
 	args := strings.Fields("-cli")
 	if err := c.Run(args); err == nil {
 		t.Error("expected error")
 	} else {
-		err := err.(*cli.Error)
-		if g, e := err.Exit, 2; g != e {
-			t.Errorf("expected %v, got %v", e, g)
+		if _, ok := err.(cli.FlagError); !ok {
+			t.Errorf("expected cli.FlagError, got %T", err)
 		}
-		if _, ok := err.Err.(cli.FlagError); !ok {
-			t.Errorf("expected cli.FlagError, got %T", err.Err)
-		}
-		if !strings.Contains(err.Err.Error(), "not defined") {
+		if !strings.Contains(err.Error(), "not defined") {
 			t.Error("unexpected error")
 		}
 	}
@@ -125,18 +123,6 @@ func TestCLIOut(t *testing.T) {
 	}
 	if err := testOut(stderr.String(), "Error,Errorln\nErrorf"); err != nil {
 		t.Error(err)
-	}
-}
-
-func TestError(t *testing.T) {
-	err := &cli.Error{Exit: 1}
-	if g, e := err.Error(), "exit status 1"; g != e {
-		t.Errorf("expected %v, got %v", e, g)
-	}
-
-	err = &cli.Error{Exit: 1, Err: errors.New("error")}
-	if g, e := err.Error(), "exit status 1: error"; g != e {
-		t.Errorf("expected %v, got %v", e, g)
 	}
 }
 

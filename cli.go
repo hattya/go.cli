@@ -78,10 +78,12 @@ func (c *CLI) Run(args []string) error {
 		c.version = true
 	}
 
+	ctx := NewContext(c)
 	if err := c.Flags.Parse(args); err != nil {
-		return &Error{2, err}
+		Help(ctx, err)
+		return err
 	}
-	return c.Action(NewContext(c))
+	return c.Action(ctx)
 }
 
 func (c *CLI) Print(a ...interface{}) (int, error) {
@@ -111,21 +113,9 @@ func (c *CLI) Errorf(format string, a ...interface{}) (int, error) {
 func Action(ctx *Context) error {
 	switch {
 	case ctx.CLI.help && ctx.Bool("help"):
-		return Help(ctx)
+		return Help(ctx, nil)
 	case ctx.CLI.version && ctx.Bool("version"):
 		return Version(ctx)
 	}
 	return nil
-}
-
-type Error struct {
-	Exit int
-	Err  error
-}
-
-func (e *Error) Error() string {
-	if e.Err == nil {
-		return fmt.Sprintf("exit status %d", e.Exit)
-	}
-	return fmt.Sprintf("exit status %d: %s", e.Exit, e.Err)
 }
