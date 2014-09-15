@@ -33,15 +33,6 @@ import (
 	"text/template"
 )
 
-const helpTmpl = `{{range usage .}}{{.}}{{end}}
-{{range $i, $flag := flags .Flags}}{{if eq $i 0 }}
-options:
-{{end}}
-  {{$flag.Format "\t"}}{{end}}
-{{if .Epilog}}
-{{.Epilog}}{{end}}
-`
-
 var (
 	Help    = PrintHelp
 	Usage   = FormatUsage
@@ -53,16 +44,24 @@ func PrintHelp(ctx *Context, err error) error {
 		ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
 	}
 
-	t := template.New("help")
-	t.Funcs(template.FuncMap{
+	fm := template.FuncMap{
 		"flags": flags,
 		"usage": Usage,
-	})
-	template.Must(t.Parse(helpTmpl))
+	}
+	t := template.Must(template.New("help").Funcs(fm).Parse(helpTmpl))
 	w := tabwriter.NewWriter(ctx.CLI.Stdout, 0, 8, 4, ' ', 0)
 	defer w.Flush()
 	return t.Execute(w, ctx.CLI)
 }
+
+const helpTmpl = `{{range usage .}}{{.}}{{end}}
+{{range $i, $flag := flags .Flags}}{{if eq $i 0 }}
+options:
+{{end}}
+  {{$flag.Format "\t"}}{{end}}
+{{if .Epilog}}
+{{.Epilog}}{{end}}
+`
 
 func flags(fs *FlagSet) []*Flag {
 	var flags []*Flag
