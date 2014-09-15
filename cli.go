@@ -110,7 +110,9 @@ func (c *CLI) Errorf(format string, a ...interface{}) (int, error) {
 	return fmt.Fprintf(c.Stderr, format, a...)
 }
 
-func Action(ctx *Context) error {
+var Action = DefaultAction
+
+func DefaultAction(ctx *Context) error {
 	switch {
 	case ctx.CLI.help && ctx.Bool("help"):
 		return Help(ctx, nil)
