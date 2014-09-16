@@ -35,26 +35,95 @@ import (
 	"github.com/hattya/go.cli"
 )
 
-var helpOut = `usage: %s
-
-options:
+var options = `options:
 
   -h, --help    show help
-  --version     show version information
+  --version     show version information`
 
-`
+type helpTest struct {
+	usage  interface{}
+	desc   string
+	epilog string
+	out    string
+}
+
+var helpTests = []helpTest{
+	{
+		out: `usage: %[1]s
+
+%[2]s
+
+`,
+	},
+	{
+		usage: "<options>",
+		out: `usage: %[1]s <options>
+
+%[2]s
+
+`,
+	},
+	{
+		usage: []string{
+			"add <path>...",
+			"rm <path>...",
+		},
+		out: `usage: %[1]s add <path>...
+   or: %[1]s rm <path>...
+
+%[2]s
+
+`,
+	},
+	{
+		desc: "    desc",
+		out: `usage: %[1]s
+
+    desc
+
+%[2]s
+
+`,
+	},
+	{
+		epilog: "epilog",
+		out: `usage: %[1]s
+
+%[2]s
+
+epilog
+`,
+	},
+	{
+		desc:   "    desc",
+		epilog: "epilog",
+		out: `usage: %[1]s
+
+    desc
+
+%[2]s
+
+epilog
+`,
+	},
+}
 
 func TestHelp(t *testing.T) {
 	b := new(bytes.Buffer)
 	args := []string{"--help"}
-
-	c := cli.NewCLI()
-	c.Stdout = b
-	if err := c.Run(args); err != nil {
-		t.Fatal(err)
-	}
-	if err := testOut(b.String(), fmt.Sprintf(helpOut, c.Name)); err != nil {
-		t.Error(err)
+	for _, tt := range helpTests {
+		b.Reset()
+		c := cli.NewCLI()
+		c.Usage = tt.usage
+		c.Desc = tt.desc
+		c.Epilog = tt.epilog
+		c.Stdout = b
+		if err := c.Run(args); err != nil {
+			t.Fatal(err)
+		}
+		if err := testOut(b.String(), fmt.Sprintf(tt.out, c.Name, options)); err != nil {
+			t.Error(err)
+		}
 	}
 }
 
