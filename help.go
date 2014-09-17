@@ -57,11 +57,11 @@ func PrintHelp(ctx *Context, err error) error {
 const helpTmpl = `{{range usage .}}{{.}}
 {{end}}{{if .Desc}}
 {{.Desc}}
-{{end}}{{range $i, $flag := flags .Flags}}{{if eq $i 0 }}
+{{end}}{{range $i, $f := flags .Flags}}{{if eq $i 0 }}
 options:
-{{end}}
-  {{$flag.Format "\t"}}{{end}}
-{{if .Epilog}}
+
+{{end}}  {{$f.Format "\t"}}
+{{end}}{{if .Epilog}}
 {{.Epilog}}{{end}}
 `
 

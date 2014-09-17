@@ -38,11 +38,11 @@ var versionOut = `%s version %s
 `
 
 func TestVersion(t *testing.T) {
-	b := new(bytes.Buffer)
+	var b bytes.Buffer
 	args := []string{"--version"}
 
 	c := cli.NewCLI()
-	c.Stdout = b
+	c.Stdout = &b
 	if err := c.Run(args); err != nil {
 		t.Fatal(err)
 	}
@@ -53,7 +53,7 @@ func TestVersion(t *testing.T) {
 	b.Reset()
 	c = cli.NewCLI()
 	c.Version = "1.0"
-	c.Stdout = b
+	c.Stdout = &b
 	if err := c.Run(args); err != nil {
 		t.Fatal(err)
 	}

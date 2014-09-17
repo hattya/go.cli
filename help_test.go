@@ -109,7 +109,7 @@ epilog
 }
 
 func TestHelp(t *testing.T) {
-	b := new(bytes.Buffer)
+	var b bytes.Buffer
 	args := []string{"--help"}
 	for _, tt := range helpTests {
 		b.Reset()
@@ -117,7 +117,7 @@ func TestHelp(t *testing.T) {
 		c.Usage = tt.usage
 		c.Desc = tt.desc
 		c.Epilog = tt.epilog
-		c.Stdout = b
+		c.Stdout = &b
 		if err := c.Run(args); err != nil {
 			t.Fatal(err)
 		}
