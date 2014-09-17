@@ -31,6 +31,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 )
 
 type CLI struct {
@@ -52,8 +53,11 @@ type CLI struct {
 
 func NewCLI() *CLI {
 	name := filepath.Base(os.Args[0])
+	if runtime.GOOS == "windows" {
+		name = name[:len(name)-len(filepath.Ext(name))]
+	}
 	return &CLI{
-		Name:   name[:len(name)-len(filepath.Ext(name))],
+		Name:   name,
 		Flags:  NewFlagSet(),
 		Action: Action,
 	}
