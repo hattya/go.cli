@@ -187,10 +187,7 @@ func TestSortFlags(t *testing.T) {
 	flags := cli.NewFlagSet()
 	flags.Bool("help, h", false, "")
 	f := flags.Lookup("help")
-	if g, e := f.Name[0], "h"; g != e {
-		t.Errorf("expected %v, got %v", e, g)
-	}
-	if g, e := f.Name[1], "help"; g != e {
-		t.Errorf("expected %v, got %v", e, g)
+	if err := testStrings(func(i int) string { return f.Name[i] }, []string{"h", "help"}); err != nil {
+		t.Error(err)
 	}
 }

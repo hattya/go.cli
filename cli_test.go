@@ -51,7 +51,7 @@ func TestCLI(t *testing.T) {
 			t.Errorf("expected cli.FlagError, got %T", err)
 		}
 		if !strings.Contains(err.Error(), "not defined") {
-			t.Error("unexpected error")
+			t.Error("unexpected error:", err)
 		}
 	}
 
@@ -131,6 +131,25 @@ func testOut(g, e string) error {
 		return fmt.Errorf("output differ\nexpected: %q\n     got: %q", e, g)
 	}
 	return nil
+}
+
+func testStrings(get func(int) string, e []string) (err error) {
+	g := make([]string, len(e))
+	i := 0
+	for ; i < len(e); i++ {
+		g[i] = get(i)
+		if g[i] != e[i] {
+			break
+		}
+
+	}
+	if i < len(e) {
+		for ; i < len(e); i++ {
+			g[i] = get(i)
+		}
+		err = fmt.Errorf("expected %v, got %v", e, g)
+	}
+	return
 }
 
 type value struct {
