@@ -27,12 +27,15 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"runtime"
 )
+
+var ErrCmd = errors.New("cli: command required")
 
 type CLI struct {
 	Name    string
@@ -41,6 +44,7 @@ type CLI struct {
 	Desc    string
 	Epilog  string
 	Flags   *FlagSet
+	Cmds    []*Command
 	Action  func(*Context) error
 
 	Stdin  io.Reader
@@ -88,7 +92,12 @@ func (c *CLI) Run(args []string) error {
 		Help(ctx, err)
 		return err
 	}
+	ctx.Args = c.Flags.Args()
 	return c.Action(ctx)
+}
+
+func (c *CLI) Add(cmd *Command) {
+	c.Cmds = append(c.Cmds, cmd)
 }
 
 func (c *CLI) Print(a ...interface{}) (int, error) {
@@ -124,5 +133,13 @@ func DefaultAction(ctx *Context) error {
 	case ctx.CLI.version && ctx.Bool("version"):
 		return Version(ctx)
 	}
-	return nil
+
+	cmd, err := ctx.Command()
+	if cmd != nil {
+		err = cmd.Run(ctx)
+	}
+	if err != nil {
+		Help(ctx, err)
+	}
+	return err
 }

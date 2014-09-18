@@ -44,6 +44,7 @@ type helpTest struct {
 	usage  interface{}
 	desc   string
 	epilog string
+	cmds   []*cli.Command
 	out    string
 }
 
@@ -106,6 +107,56 @@ epilog
 epilog
 `,
 	},
+	{
+		cmds: []*cli.Command{
+			{
+				Name: []string{"cmd"},
+			},
+		},
+		out: `usage: %[1]s
+
+commands:
+
+  cmd
+
+%[2]s
+
+`,
+	},
+	{
+		cmds: []*cli.Command{
+			{
+				Name: []string{"cmd"},
+				Desc: "desc",
+			},
+		},
+		out: `usage: %[1]s
+
+commands:
+
+  cmd    desc
+
+%[2]s
+
+`,
+	},
+	{
+		cmds: []*cli.Command{
+			{
+				Name: []string{"cmd"},
+				Desc: " desc \n",
+			},
+		},
+		out: `usage: %[1]s
+
+commands:
+
+  cmd    desc
+
+%[2]s
+
+`,
+	},
 }
 
 func TestHelp(t *testing.T) {
@@ -117,11 +168,75 @@ func TestHelp(t *testing.T) {
 		c.Usage = tt.usage
 		c.Desc = tt.desc
 		c.Epilog = tt.epilog
+		c.Cmds = tt.cmds
 		c.Stdout = &b
 		if err := c.Run(args); err != nil {
 			t.Fatal(err)
 		}
 		if err := testOut(b.String(), fmt.Sprintf(tt.out, c.Name, options)); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+type cmdHelpTest struct {
+	usage  interface{}
+	desc   string
+	epilog string
+	out    string
+}
+
+var cmdHelpTests = []cmdHelpTest{
+	{
+		out: `usage: %[1]s %[2]s
+`,
+	},
+	{
+		desc: "    desc",
+		out: `usage: %[1]s %[2]s
+
+    desc
+
+`,
+	},
+	{
+		epilog: "epilog",
+		out: `usage: %[1]s %[2]s
+
+epilog
+`,
+	},
+	{
+		desc:   "    desc",
+		epilog: "epilog",
+		out: `usage: %[1]s %[2]s
+
+    desc
+
+epilog
+`,
+	},
+}
+
+func TestCmdHelp(t *testing.T) {
+	b := new(bytes.Buffer)
+	name := []string{"cmd"}
+	args := []string{name[0], "--help"}
+	for _, tt := range cmdHelpTests {
+		b.Reset()
+		c := cli.NewCLI()
+		c.Add(&cli.Command{
+			Name:   name,
+			Usage:  tt.usage,
+			Desc:   tt.desc,
+			Epilog: tt.epilog,
+			Flags:  cli.NewFlagSet(),
+		})
+		c.Stdout = b
+		if err := c.Run(args); err != nil {
+			t.Fatal(err)
+		}
+		if err := testOut(b.String(), fmt.Sprintf(tt.out, c.Name, name[0])); err != nil {
 			t.Error(err)
 		}
 	}
@@ -151,7 +266,7 @@ func TestUsage(t *testing.T) {
 	for _, tt := range usageTests {
 		c := cli.NewCLI()
 		c.Usage = tt.usage
-		if err := testOut(strings.Join(cli.Usage(c), "\n"), fmt.Sprintf(tt.format, c.Name)); err != nil {
+		if err := testOut(strings.Join(cli.Usage(cli.NewContext(c)), "\n"), fmt.Sprintf(tt.format, c.Name)); err != nil {
 			t.Error(err)
 		}
 	}
@@ -166,7 +281,7 @@ func TestUsagePanic(t *testing.T) {
 
 	c := cli.NewCLI()
 	c.Usage = 1
-	cli.Usage(c)
+	cli.Usage(cli.NewContext(c))
 }
 
 type metaVarTest struct {

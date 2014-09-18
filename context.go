@@ -26,21 +26,47 @@
 
 package cli
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Context struct {
-	CLI *CLI
+	CLI   *CLI
+	Cmd   *Command
+	Flags *FlagSet
+	Args  []string
 }
 
 func NewContext(cli *CLI) *Context {
-	return &Context{cli}
+	return &Context{
+		CLI:   cli,
+		Flags: cli.Flags,
+		Args:  cli.Flags.Args(),
+	}
 }
 
-func (c *Context) Arg(i int) string { return c.CLI.Flags.Arg(i) }
+func (c *Context) Name() string {
+	if c.Cmd != nil {
+		return fmt.Sprintf("%s %s", c.CLI.Name, c.Cmd.Name[0])
+	}
+	return c.CLI.Name
+}
 
-func (c *Context) Args() []string { return c.CLI.Flags.Args() }
-
-func (c *Context) NArg() int { return c.CLI.Flags.NArg() }
+func (c *Context) Command() (cmd *Command, err error) {
+	switch {
+	case len(c.CLI.Cmds) == 0:
+	case len(c.Args) == 0:
+		err = ErrCmd
+	default:
+		cmd, err = FindCmd(c.CLI.Cmds, c.Args[0])
+		if err == nil {
+			c.Cmd = cmd
+			c.Args = c.Args[1:]
+		}
+	}
+	return
+}
 
 func (c *Context) Bool(name string) bool {
 	return c.Value(name).(bool)
@@ -75,7 +101,7 @@ func (c *Context) Uint64(name string) uint64 {
 }
 
 func (c *Context) Value(name string) interface{} {
-	if f := c.CLI.Flags.Lookup(name); f != nil {
+	if f := c.Flags.Lookup(name); f != nil {
 		return f.Value.Get()
 	}
 	return nil

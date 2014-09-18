@@ -70,12 +70,12 @@ func TestCLI(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctx := cli.NewContext(c)
-	for i := 0; i < ctx.NArg(); i++ {
-		if g, e := ctx.Arg(i), strconv.FormatInt(int64(i), 10); g != e {
+	for i := 0; i < len(ctx.Args); i++ {
+		if g, e := ctx.Args[i], strconv.FormatInt(int64(i), 10); g != e {
 			t.Errorf("expected %v, got %v", e, g)
 		}
 	}
-	if g, e := len(ctx.Args()), 2; g != e {
+	if g, e := len(ctx.Args), 2; g != e {
 		t.Errorf("expected %v, got %v", e, g)
 	}
 	if g := ctx.Value(""); g != nil {

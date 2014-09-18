@@ -29,6 +29,7 @@ package cli
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"text/tabwriter"
 	"text/template"
 )
@@ -40,30 +41,54 @@ var (
 )
 
 func PrintHelp(ctx *Context, err error) error {
-	if err != nil {
+	if err != nil && err != ErrCmd {
 		ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
 	}
 
 	fm := template.FuncMap{
-		"flags": flags,
-		"usage": Usage,
+		"cmds":   cmds,
+		"flags":  flags,
+		"format": format,
+		"usage":  Usage,
 	}
 	t := template.Must(template.New("help").Funcs(fm).Parse(helpTmpl))
 	w := tabwriter.NewWriter(ctx.CLI.Stdout, 0, 8, 4, ' ', 0)
 	defer w.Flush()
-	return t.Execute(w, ctx.CLI)
+	return t.Execute(w, ctx)
 }
 
 const helpTmpl = `{{range usage .}}{{.}}
-{{end}}{{if .Desc}}
+{{end}}{{with or .Cmd .CLI}}{{if .Desc}}
 {{.Desc}}
-{{end}}{{range $i, $f := flags .Flags}}{{if eq $i 0 }}
+{{end}}{{end}}{{if not .Cmd}}{{range $i, $cmd := cmds .CLI.Cmds}}{{if eq $i 0}}
+commands:
+
+{{end}}  {{format $cmd "\t"}}
+{{end}}{{end}}{{with or .Cmd .CLI}}{{$flags := flags .Flags}}{{range $i, $f := $flags}}{{if eq $i 0 }}
 options:
 
 {{end}}  {{$f.Format "\t"}}
 {{end}}{{if .Epilog}}
-{{.Epilog}}{{end}}
-`
+{{.Epilog}}
+{{else if or .Desc (lt 0 (len $flags))}}
+{{end}}{{end}}`
+
+func cmds(cmds []*Command) []*Command {
+	list := make(CommandSlice, len(cmds))
+	copy(list, cmds)
+	list.Sort()
+	return list
+}
+
+func format(cmd *Command, sep string) string {
+	var b bytes.Buffer
+	b.WriteString(cmd.Name[0])
+	if cmd.Desc != "" {
+		b.WriteString(sep)
+		b.WriteString(strings.TrimSpace(strings.Split(cmd.Desc, "\n")[0]))
+	}
+	return b.String()
+}
 
 func flags(fs *FlagSet) []*Flag {
 	var flags []*Flag
@@ -73,9 +98,15 @@ func flags(fs *FlagSet) []*Flag {
 	return flags
 }
 
-func FormatUsage(cli *CLI) []string {
+func FormatUsage(ctx *Context) []string {
+	var i interface{}
+	if ctx.Cmd != nil {
+		i = ctx.Cmd.Usage
+	} else {
+		i = ctx.CLI.Usage
+	}
 	var usage []string
-	switch v := cli.Usage.(type) {
+	switch v := i.(type) {
 	case nil:
 		usage = []string{""}
 	case string:
@@ -94,7 +125,7 @@ func FormatUsage(cli *CLI) []string {
 		} else {
 			b.WriteString("   or: ")
 		}
-		b.WriteString(cli.Name)
+		b.WriteString(ctx.Name())
 		if s != "" {
 			b.WriteRune(' ')
 			b.WriteString(s)

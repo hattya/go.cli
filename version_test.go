@@ -60,4 +60,20 @@ func TestVersion(t *testing.T) {
 	if err := testOut(b.String(), fmt.Sprintf(versionOut, c.Name, c.Version)); err != nil {
 		t.Error(err)
 	}
+
+	b.Reset()
+	c = cli.NewCLI()
+	c.Version = "1.0"
+	c.Add(&cli.Command{
+		Name:  []string{"cmd"},
+		Flags: cli.NewFlagSet(),
+	})
+	c.Stdout = &b
+	args = []string{"cmd", "--version"}
+	if err := c.Run(args); err != nil {
+		t.Fatal(err)
+	}
+	if err := testOut(b.String(), fmt.Sprintf(versionOut, c.Name, c.Version)); err != nil {
+		t.Error(err)
+	}
 }
