@@ -95,6 +95,22 @@ func TestCommand(t *testing.T) {
 	if err := c.Run(args); err != nil {
 		t.Error("unexpected error:", err)
 	}
+
+	c, cmd = newCLI()
+	c.Flags.Bool("cli", false, "")
+	cmd.Flags.Bool("cmd", false, "")
+	cmd.Action = func(ctx *cli.Context) error {
+		for _, n := range []string{"cli", "cmd"} {
+			if g, e := ctx.Bool(n), true; g != e {
+				t.Errorf("expected %v, got %v", e, g)
+			}
+		}
+		return nil
+	}
+	args = []string{"-cli", cmd.Name[0], "-cmd"}
+	if err := c.Run(args); err != nil {
+		t.Error("unexpected error:", err)
+	}
 }
 
 func TestFindCmd(t *testing.T) {
