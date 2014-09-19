@@ -37,6 +37,7 @@ type Command struct {
 	Usage  interface{}
 	Desc   string
 	Epilog string
+	Cmds   []*Command
 	Flags  *FlagSet
 	Action func(*Context) error
 }
@@ -44,8 +45,9 @@ type Command struct {
 func (c *Command) Run(ctx *Context) error {
 	if c.Flags != nil {
 		ctx.Flags = NewFlagSet()
-		for _, fs := range []*FlagSet{ctx.CLI.Flags, c.Flags} {
-			fs.VisitAll(ctx.Flags.Add)
+		ctx.CLI.Flags.VisitAll(ctx.Flags.Add)
+		for _, cmd := range ctx.Stack {
+			cmd.Flags.VisitAll(ctx.Flags.Add)
 		}
 		if err := ctx.Flags.Parse(ctx.Args); err != nil {
 			return err
@@ -53,19 +55,13 @@ func (c *Command) Run(ctx *Context) error {
 		ctx.Args = ctx.Flags.Args()
 	}
 	if c.Action == nil {
-		return c.action(ctx)
+		return ctx.CLI.Action(ctx)
 	}
 	return c.Action(ctx)
 }
 
-func (c *Command) action(ctx *Context) error {
-	switch {
-	case ctx.CLI.help && ctx.Bool("help"):
-		return Help(ctx, nil)
-	case ctx.CLI.version && ctx.Bool("version"):
-		return Version(ctx)
-	}
-	return nil
+func (c *Command) Add(cmd *Command) {
+	c.Cmds = append(c.Cmds, cmd)
 }
 
 func FindCmd(cmds []*Command, name string) (cmd *Command, err error) {

@@ -136,6 +136,7 @@ func DefaultAction(ctx *Context) error {
 
 	cmd, err := ctx.Command()
 	if cmd != nil {
+		ctx.Stack = append(ctx.Stack, cmd)
 		err = cmd.Run(ctx)
 	}
 	if err != nil {

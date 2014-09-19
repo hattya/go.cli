@@ -27,14 +27,15 @@
 package cli
 
 import (
-	"fmt"
+	"bytes"
 	"time"
 )
 
 type Context struct {
-	CLI *CLI
-	Cmd *Command
+	CLI   *CLI
+	Stack []*Command
 
+	Cmds  []*Command
 	Flags *FlagSet
 	Args  []string
 }
@@ -42,27 +43,34 @@ type Context struct {
 func NewContext(cli *CLI) *Context {
 	return &Context{
 		CLI:   cli,
+		Cmds:  cli.Cmds,
 		Flags: cli.Flags,
 		Args:  cli.Flags.Args(),
 	}
 }
 
 func (c *Context) Name() string {
-	if c.Cmd != nil {
-		return fmt.Sprintf("%s %s", c.CLI.Name, c.Cmd.Name[0])
+	if 0 < len(c.Stack) {
+		var b bytes.Buffer
+		b.WriteString(c.CLI.Name)
+		for _, cmd := range c.Stack {
+			b.WriteRune(' ')
+			b.WriteString(cmd.Name[0])
+		}
+		return b.String()
 	}
 	return c.CLI.Name
 }
 
 func (c *Context) Command() (cmd *Command, err error) {
 	switch {
-	case len(c.CLI.Cmds) == 0:
+	case len(c.Cmds) == 0:
 	case len(c.Args) == 0:
 		err = ErrCmd
 	default:
-		cmd, err = FindCmd(c.CLI.Cmds, c.Args[0])
+		cmd, err = FindCmd(c.Cmds, c.Args[0])
 		if err == nil {
-			c.Cmd = cmd
+			c.Cmds = cmd.Cmds
 			c.Args = c.Args[1:]
 		}
 	}

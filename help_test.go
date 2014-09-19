@@ -183,6 +183,7 @@ type cmdHelpTest struct {
 	usage  interface{}
 	desc   string
 	epilog string
+	cmds   []*cli.Command
 	out    string
 }
 
@@ -216,6 +217,21 @@ epilog
 epilog
 `,
 	},
+	{
+		cmds: []*cli.Command{
+			{
+				Name: []string{"cmd"},
+				Desc: "desc",
+			},
+		},
+		out: `usage: %[1]s %[2]s
+
+commands:
+
+  cmd    desc
+
+`,
+	},
 }
 
 func TestCmdHelp(t *testing.T) {
@@ -230,6 +246,7 @@ func TestCmdHelp(t *testing.T) {
 			Usage:  tt.usage,
 			Desc:   tt.desc,
 			Epilog: tt.epilog,
+			Cmds:   tt.cmds,
 			Flags:  cli.NewFlagSet(),
 		})
 		c.Stdout = b

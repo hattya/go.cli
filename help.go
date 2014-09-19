@@ -47,6 +47,7 @@ func PrintHelp(ctx *Context, err error) error {
 
 	fm := template.FuncMap{
 		"usage":  Usage,
+		"cmd":    cmd,
 		"cmds":   cmds,
 		"format": format,
 		"flags":  flags,
@@ -58,20 +59,27 @@ func PrintHelp(ctx *Context, err error) error {
 }
 
 const helpTmpl = `{{range usage .}}{{.}}
-{{end}}{{with or .Cmd .CLI}}{{if .Desc}}
+{{end}}{{with or (cmd .) .CLI}}{{if .Desc}}
 {{.Desc}}
-{{end}}{{end}}{{if not .Cmd}}{{range $i, $cmd := cmds .CLI.Cmds}}{{if eq $i 0}}
+{{end}}{{range $i, $cmd := cmds .Cmds}}{{if eq $i 0}}
 commands:
 
 {{end}}  {{format $cmd "\t"}}
-{{end}}{{end}}{{with or .Cmd .CLI}}{{$flags := flags .Flags}}{{range $i, $f := $flags}}{{if eq $i 0 }}
+{{end}}{{$flags := flags .Flags}}{{range $i, $f := $flags}}{{if eq $i 0 }}
 options:
 
 {{end}}  {{$f.Format "\t"}}
 {{end}}{{if .Epilog}}
 {{.Epilog}}
-{{else if or .Desc (lt 0 (len $flags))}}
+{{else if or .Desc (lt 0 (len .Cmds)) (lt 0 (len $flags))}}
 {{end}}{{end}}`
+
+func cmd(ctx *Context) *Command {
+	if len(ctx.Stack) == 0 {
+		return nil
+	}
+	return ctx.Stack[len(ctx.Stack)-1]
+}
 
 func cmds(cmds []*Command) []*Command {
 	list := make(CommandSlice, len(cmds))
@@ -100,8 +108,8 @@ func flags(fs *FlagSet) []*Flag {
 
 func FormatUsage(ctx *Context) []string {
 	var i interface{}
-	if ctx.Cmd != nil {
-		i = ctx.Cmd.Usage
+	if 0 < len(ctx.Stack) {
+		i = ctx.Stack[len(ctx.Stack)-1].Usage
 	} else {
 		i = ctx.CLI.Usage
 	}
