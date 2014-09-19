@@ -43,8 +43,8 @@ type CLI struct {
 	Usage   interface{}
 	Desc    string
 	Epilog  string
-	Flags   *FlagSet
 	Cmds    []*Command
+	Flags   *FlagSet
 	Action  func(*Context) error
 
 	Stdin  io.Reader

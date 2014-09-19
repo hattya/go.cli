@@ -45,9 +45,7 @@ func (c *Command) Run(ctx *Context) error {
 	if c.Flags != nil {
 		ctx.Flags = NewFlagSet()
 		for _, fs := range []*FlagSet{ctx.CLI.Flags, c.Flags} {
-			fs.VisitAll(func(f *Flag) {
-				ctx.Flags.Add(f)
-			})
+			fs.VisitAll(ctx.Flags.Add)
 		}
 		if err := ctx.Flags.Parse(ctx.Args); err != nil {
 			return err

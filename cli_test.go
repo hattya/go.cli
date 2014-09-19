@@ -43,7 +43,7 @@ func TestCLI(t *testing.T) {
 	c := cli.NewCLI()
 	c.Stdout = ioutil.Discard
 	c.Stderr = ioutil.Discard
-	args := strings.Fields("-cli")
+	args := []string{"-cli"}
 	if err := c.Run(args); err == nil {
 		t.Error("expected error")
 	} else {

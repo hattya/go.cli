@@ -32,8 +32,9 @@ import (
 )
 
 type Context struct {
-	CLI   *CLI
-	Cmd   *Command
+	CLI *CLI
+	Cmd *Command
+
 	Flags *FlagSet
 	Args  []string
 }

@@ -88,7 +88,9 @@ func TestCommand(t *testing.T) {
 	}
 
 	c, cmd = newCLI()
-	cmd.Action = func(*cli.Context) error { return nil }
+	cmd.Action = func(*cli.Context) error {
+		return nil
+	}
 	args = []string{cmd.Name[0]}
 	if err := c.Run(args); err != nil {
 		t.Error("unexpected error:", err)

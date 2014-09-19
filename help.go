@@ -46,10 +46,10 @@ func PrintHelp(ctx *Context, err error) error {
 	}
 
 	fm := template.FuncMap{
-		"cmds":   cmds,
-		"flags":  flags,
-		"format": format,
 		"usage":  Usage,
+		"cmds":   cmds,
+		"format": format,
+		"flags":  flags,
 	}
 	t := template.Must(template.New("help").Funcs(fm).Parse(helpTmpl))
 	w := tabwriter.NewWriter(ctx.CLI.Stdout, 0, 8, 4, ' ', 0)
