@@ -35,7 +35,7 @@ import (
 	"runtime"
 )
 
-var ErrCmd = errors.New("cli: command required")
+var ErrCommand = errors.New("cli: command required")
 
 type CLI struct {
 	Name    string

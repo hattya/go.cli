@@ -64,7 +64,7 @@ func TestCommand(t *testing.T) {
 	switch err := c.Run(args); {
 	case err == nil:
 		t.Error("expected error")
-	case err != cli.ErrCmd:
+	case err != cli.ErrCommand:
 		t.Error("unexpected error:", err)
 	}
 
@@ -147,7 +147,7 @@ func TestSubcommand(t *testing.T) {
 	switch err := c.Run(args); {
 	case err == nil:
 		t.Error("expected error")
-	case err != cli.ErrCmd:
+	case err != cli.ErrCommand:
 		t.Error("unexpected error:", err)
 	}
 

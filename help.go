@@ -41,7 +41,7 @@ var (
 )
 
 func PrintHelp(ctx *Context, err error) error {
-	if err != nil && err != ErrCmd {
+	if err != nil && err != ErrCommand {
 		ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
 	}
 
