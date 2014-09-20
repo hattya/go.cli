@@ -179,7 +179,7 @@ func TestHelp(t *testing.T) {
 	}
 }
 
-type cmdHelpTest struct {
+type commandHelpTest struct {
 	usage  interface{}
 	desc   string
 	epilog string
@@ -187,7 +187,7 @@ type cmdHelpTest struct {
 	out    string
 }
 
-var cmdHelpTests = []cmdHelpTest{
+var commandHelpTests = []commandHelpTest{
 	{
 		out: `usage: %[1]s %[2]s
 `,
@@ -234,11 +234,11 @@ commands:
 	},
 }
 
-func TestCmdHelp(t *testing.T) {
+func TestCommandHelp(t *testing.T) {
 	b := new(bytes.Buffer)
 	name := []string{"cmd"}
 	args := []string{name[0], "--help"}
-	for _, tt := range cmdHelpTests {
+	for _, tt := range commandHelpTests {
 		b.Reset()
 		c := cli.NewCLI()
 		c.Add(&cli.Command{
