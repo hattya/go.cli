@@ -197,6 +197,92 @@ func TestSubcommand(t *testing.T) {
 	}
 }
 
+func TestChain(t *testing.T) {
+	action := cli.Action
+	cli.Action = cli.Chain
+	defer func() { cli.Action = action }()
+
+	newCLI := func() (*cli.CLI, []*cli.Command) {
+		c := cli.NewCLI()
+		c.Stdout = ioutil.Discard
+		c.Stderr = ioutil.Discard
+		for _, n := range []string{"foo", "bar", "baz"} {
+			cmd := &cli.Command{
+				Name:  []string{n},
+				Flags: cli.NewFlagSet(),
+			}
+			cmd.Flags.Bool(n, false, "")
+			c.Add(cmd)
+		}
+		return c, c.Cmds
+	}
+
+	c, _ := newCLI()
+	args := []string{"_"}
+	if err := c.Run(args); err == nil {
+		t.Error("expected error")
+	} else {
+		if _, ok := err.(*cli.CommandError); !ok {
+			t.Errorf("expected *cli.CommandError, got %T", err)
+		}
+		if !strings.Contains(err.Error(), "unknown") {
+			t.Error("unexpected error:", err)
+		}
+	}
+
+	c, _ = newCLI()
+	args = []string{}
+	switch err := c.Run(args); {
+	case err == nil:
+		t.Error("expected error")
+	case err != cli.ErrCommand:
+		t.Error("unexpected error:", err)
+	}
+
+	c, cmds := newCLI()
+	args = []string{cmds[0].Name[0], "-chain"}
+	if err := c.Run(args); err == nil {
+		t.Error("expected error")
+	} else {
+		if _, ok := err.(cli.FlagError); !ok {
+			t.Errorf("expected cli.FlagError, got %T", err)
+		}
+		if !strings.Contains(err.Error(), "not defined") {
+			t.Error("unexpected error:", err)
+		}
+	}
+
+	c, cmds = newCLI()
+	args = nil
+	for _, cmd := range cmds {
+		args = append(args, cmd.Name[0])
+	}
+	if err := c.Run(args); err != nil {
+		t.Error("unexpected error:", err)
+	}
+
+	c, cmds = newCLI()
+	args = nil
+	i := 0
+	for _, cmd := range cmds {
+		args = append(args, cmd.Name[0], "-"+cmd.Name[0])
+		cmd.Action = func(ctx *cli.Context) error {
+			n := ctx.Stack[0].Name[0]
+			if g, e := n, args[i]; g != e {
+				t.Errorf("expected %v, got %v", e, g)
+			}
+			if g, e := ctx.Bool(n), true; g != e {
+				t.Errorf("expected %v, got %v", e, g)
+			}
+			i += 2
+			return nil
+		}
+	}
+	if err := c.Run(args); err != nil {
+		t.Error("unexpected error:", err)
+	}
+}
+
 func TestFindCommand(t *testing.T) {
 	cmds := []*cli.Command{
 		{Name: []string{"foo"}},

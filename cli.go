@@ -143,3 +143,30 @@ func Subcommand(ctx *Context) error {
 	}
 	return err
 }
+
+func Chain(ctx *Context) error {
+	if 0 < len(ctx.Stack) {
+		return nil
+	}
+
+	for {
+		cmd, err := ctx.Command()
+		if cmd != nil {
+			ctx.Cmds = ctx.CLI.Cmds
+			if len(ctx.Stack) == 0 {
+				ctx.Stack = []*Command{cmd}
+			} else {
+				ctx.Stack[0] = cmd
+			}
+			err = cmd.Run(ctx)
+		}
+		switch {
+		case err != nil:
+			ctx.Stack = nil
+			Help(ctx, err)
+			return err
+		case len(ctx.Args) == 0:
+			return nil
+		}
+	}
+}
