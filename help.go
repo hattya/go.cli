@@ -100,9 +100,11 @@ func format(cmd *Command, sep string) string {
 
 func flags(fs *FlagSet) []*Flag {
 	var flags []*Flag
-	fs.VisitAll(func(f *Flag) {
-		flags = append(flags, f)
-	})
+	if fs != nil {
+		fs.VisitAll(func(f *Flag) {
+			flags = append(flags, f)
+		})
+	}
 	return flags
 }
 
