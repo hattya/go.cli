@@ -38,6 +38,7 @@ type Context struct {
 	Cmds  []*Command
 	Flags *FlagSet
 	Args  []string
+	Data  interface{}
 }
 
 func NewContext(cli *CLI) *Context {
