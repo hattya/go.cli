@@ -68,7 +68,7 @@ func (c *Context) Command() (cmd *Command, err error) {
 	case len(c.Args) == 0:
 		err = ErrCommand
 	default:
-		cmd, err = FindCmd(c.Cmds, c.Args[0])
+		cmd, err = FindCommand(c.Cmds, c.Args[0])
 		if err == nil {
 			c.Cmds = cmd.Cmds
 			c.Args = c.Args[1:]

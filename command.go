@@ -64,7 +64,7 @@ func (c *Command) Add(cmd *Command) {
 	c.Cmds = append(c.Cmds, cmd)
 }
 
-func FindCmd(cmds []*Command, name string) (cmd *Command, err error) {
+func FindCommand(cmds []*Command, name string) (cmd *Command, err error) {
 	set := make(map[string]*Command)
 L:
 	for _, c := range cmds {

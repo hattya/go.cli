@@ -197,14 +197,14 @@ func TestSubcommand(t *testing.T) {
 	}
 }
 
-func TestFindCmd(t *testing.T) {
+func TestFindCommand(t *testing.T) {
 	cmds := []*cli.Command{
 		{Name: []string{"foo"}},
 		{Name: []string{"bar"}},
 		{Name: []string{"baz"}},
 	}
 
-	_, err := cli.FindCmd(cmds, "")
+	_, err := cli.FindCommand(cmds, "")
 	switch {
 	case err == nil:
 		t.Fatal("expected error")
@@ -212,7 +212,7 @@ func TestFindCmd(t *testing.T) {
 		t.Fatal("unexpected error:", err)
 	}
 
-	cmd, err := cli.FindCmd(cmds, "foo")
+	cmd, err := cli.FindCommand(cmds, "foo")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -220,7 +220,7 @@ func TestFindCmd(t *testing.T) {
 		t.Errorf("expected %v, got %v", e, g)
 	}
 
-	_, err = cli.FindCmd(cmds, "b")
+	_, err = cli.FindCommand(cmds, "b")
 	switch {
 	case err == nil:
 		t.Fatal("expected error")
@@ -229,7 +229,7 @@ func TestFindCmd(t *testing.T) {
 	}
 
 	cmds[1].Name = append(cmds[1].Name, "b")
-	cmd, err = cli.FindCmd(cmds, "b")
+	cmd, err = cli.FindCommand(cmds, "b")
 	if err != nil {
 		t.Fatal(err)
 	}
