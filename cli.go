@@ -93,6 +93,12 @@ func (c *CLI) Run(args []string) error {
 		return err
 	}
 	ctx.Args = c.Flags.Args()
+	switch {
+	case ctx.CLI.help && ctx.Bool("help"):
+		return Help(ctx, nil)
+	case ctx.CLI.version && ctx.Bool("version"):
+		return Version(ctx)
+	}
 	return c.Action(ctx)
 }
 
@@ -127,13 +133,6 @@ func (c *CLI) Errorf(format string, a ...interface{}) (int, error) {
 var Action = Subcommand
 
 func Subcommand(ctx *Context) error {
-	switch {
-	case ctx.CLI.help && ctx.Bool("help"):
-		return Help(ctx, nil)
-	case ctx.CLI.version && ctx.Bool("version"):
-		return Version(ctx)
-	}
-
 	cmd, err := ctx.Command()
 	if cmd != nil {
 		ctx.Stack = append(ctx.Stack, cmd)

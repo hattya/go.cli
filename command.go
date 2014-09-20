@@ -54,6 +54,12 @@ func (c *Command) Run(ctx *Context) error {
 			return err
 		}
 		ctx.Args = ctx.Flags.Args()
+		switch {
+		case ctx.CLI.help && ctx.Bool("help"):
+			return Help(ctx, nil)
+		case ctx.CLI.version && ctx.Bool("version"):
+			return Version(ctx)
+		}
 	}
 	if c.Action == nil {
 		return ctx.CLI.Action(ctx)
