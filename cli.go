@@ -124,9 +124,9 @@ func (c *CLI) Errorf(format string, a ...interface{}) (int, error) {
 	return fmt.Fprintf(c.Stderr, format, a...)
 }
 
-var Action = DefaultAction
+var Action = Subcommand
 
-func DefaultAction(ctx *Context) error {
+func Subcommand(ctx *Context) error {
 	switch {
 	case ctx.CLI.help && ctx.Bool("help"):
 		return Help(ctx, nil)
