@@ -40,6 +40,7 @@ type Command struct {
 	Cmds   []*Command
 	Flags  *FlagSet
 	Action func(*Context) error
+	Data   interface{}
 }
 
 func (c *Command) Run(ctx *Context) error {
