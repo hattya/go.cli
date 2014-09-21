@@ -35,12 +35,12 @@ import (
 )
 
 var (
-	Help    = PrintHelp
+	Help    = ShowHelp
 	Usage   = FormatUsage
 	MetaVar = FormatMetaVar
 )
 
-func PrintHelp(ctx *Context, err error) error {
+func ShowHelp(ctx *Context, err error) error {
 	if err != nil && err != ErrCommand {
 		ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
 	}
