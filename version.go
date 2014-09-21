@@ -26,9 +26,9 @@
 
 package cli
 
-var Version = PrintVersion
+var Version = ShowVersion
 
-func PrintVersion(ctx *Context) error {
+func ShowVersion(ctx *Context) error {
 	version := ctx.CLI.Version
 	if version == "" {
 		version = "unknown"
