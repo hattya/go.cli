@@ -180,6 +180,7 @@ func TestHelp(t *testing.T) {
 }
 
 type commandHelpTest struct {
+	alias  []string
 	usage  interface{}
 	desc   string
 	epilog string
@@ -190,6 +191,13 @@ type commandHelpTest struct {
 var commandHelpTests = []commandHelpTest{
 	{
 		out: `usage: %[1]s %[2]s
+`,
+	},
+	{
+		alias: []string{"alias"},
+		out: `usage: %[1]s %[2]s
+
+alias: alias
 `,
 	},
 	{
@@ -208,9 +216,12 @@ epilog
 `,
 	},
 	{
+		alias:  []string{"alias"},
 		desc:   "    desc",
 		epilog: "epilog",
 		out: `usage: %[1]s %[2]s
+
+alias: alias
 
     desc
 
@@ -242,7 +253,7 @@ func TestCommandHelp(t *testing.T) {
 		b.Reset()
 		c := cli.NewCLI()
 		c.Add(&cli.Command{
-			Name:   name,
+			Name:   append(name, tt.alias...),
 			Usage:  tt.usage,
 			Desc:   tt.desc,
 			Epilog: tt.epilog,

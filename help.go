@@ -109,9 +109,11 @@ func flags(fs *FlagSet) []*Flag {
 }
 
 func FormatUsage(ctx *Context) []string {
+	var cmd *Command
 	var u interface{}
 	if 0 < len(ctx.Stack) {
-		u = ctx.Stack[len(ctx.Stack)-1].Usage
+		cmd = ctx.Stack[len(ctx.Stack)-1]
+		u = cmd.Usage
 	} else {
 		u = ctx.CLI.Usage
 	}
@@ -142,6 +144,9 @@ func FormatUsage(ctx *Context) []string {
 		}
 		usage[i] = b.String()
 		b.Reset()
+	}
+	if cmd != nil && 1 < len(cmd.Name) {
+		usage = append(usage, "", "alias: "+strings.Join(cmd.Name[1:], ", "))
 	}
 	return usage
 }
