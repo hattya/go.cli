@@ -109,14 +109,14 @@ func flags(fs *FlagSet) []*Flag {
 }
 
 func FormatUsage(ctx *Context) []string {
-	var i interface{}
+	var u interface{}
 	if 0 < len(ctx.Stack) {
-		i = ctx.Stack[len(ctx.Stack)-1].Usage
+		u = ctx.Stack[len(ctx.Stack)-1].Usage
 	} else {
-		i = ctx.CLI.Usage
+		u = ctx.CLI.Usage
 	}
 	var usage []string
-	switch v := i.(type) {
+	switch v := u.(type) {
 	case nil:
 		usage = []string{""}
 	case string:

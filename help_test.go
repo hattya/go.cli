@@ -220,7 +220,7 @@ epilog
 	{
 		cmds: []*cli.Command{
 			{
-				Name: []string{"cmd"},
+				Name: []string{"subcmd"},
 				Desc: "desc",
 			},
 		},
@@ -228,7 +228,7 @@ epilog
 
 commands:
 
-  cmd    desc
+  subcmd    desc
 
 `,
 	},
