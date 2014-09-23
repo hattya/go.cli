@@ -33,6 +33,6 @@ func ShowVersion(ctx *Context) error {
 	if version == "" {
 		version = "unknown"
 	}
-	ctx.CLI.Printf("%s version %s\n", ctx.CLI.Name, version)
+	ctx.CLI.Printf("%v version %v\n", ctx.CLI.Name, version)
 	return nil
 }

@@ -162,5 +162,5 @@ func FormatMetaVar(f *Flag) string {
 			break
 		}
 	}
-	return fmt.Sprintf(" <%s>", s)
+	return fmt.Sprintf(" <%v>", s)
 }

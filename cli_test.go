@@ -162,4 +162,4 @@ func (f *value) Set(v string) error {
 }
 
 func (f *value) Get() interface{} { return f.s }
-func (f *value) String() string   { return fmt.Sprintf("%s", f.s) }
+func (f *value) String() string   { return fmt.Sprintf("%v", f.s) }

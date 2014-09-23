@@ -123,9 +123,9 @@ type CommandError struct {
 
 func (e *CommandError) Error() string {
 	if len(e.List) == 0 {
-		return fmt.Sprintf("unknown command '%s'", e.Name)
+		return fmt.Sprintf("unknown command '%v'", e.Name)
 	}
-	return fmt.Sprintf("command '%s' is ambiguous (%s)", e.Name, strings.Join(e.List, ", "))
+	return fmt.Sprintf("command '%v' is ambiguous (%v)", e.Name, strings.Join(e.List, ", "))
 }
 
 type CommandSlice []*Command

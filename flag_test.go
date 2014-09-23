@@ -39,7 +39,7 @@ import (
 
 func TestFlagSet(t *testing.T) {
 	envVar := func(s string) string {
-		return fmt.Sprintf("__CLI_%s__", strings.ToUpper(s))
+		return fmt.Sprintf("__CLI_%v__", strings.ToUpper(s))
 	}
 
 	values := map[string]interface{}{

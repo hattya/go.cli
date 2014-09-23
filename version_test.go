@@ -34,7 +34,7 @@ import (
 	"github.com/hattya/go.cli"
 )
 
-var versionOut = `%s version %s
+var versionOut = `%v version %v
 `
 
 func TestVersion(t *testing.T) {

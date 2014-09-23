@@ -50,17 +50,17 @@ type helpTest struct {
 
 var helpTests = []helpTest{
 	{
-		out: `usage: %[1]s
+		out: `usage: %[1]v
 
-%[2]s
+%[2]v
 
 `,
 	},
 	{
 		usage: "<options>",
-		out: `usage: %[1]s <options>
+		out: `usage: %[1]v <options>
 
-%[2]s
+%[2]v
 
 `,
 	},
@@ -69,28 +69,28 @@ var helpTests = []helpTest{
 			"add <path>...",
 			"rm <path>...",
 		},
-		out: `usage: %[1]s add <path>...
-   or: %[1]s rm <path>...
+		out: `usage: %[1]v add <path>...
+   or: %[1]v rm <path>...
 
-%[2]s
+%[2]v
 
 `,
 	},
 	{
 		desc: "    desc",
-		out: `usage: %[1]s
+		out: `usage: %[1]v
 
     desc
 
-%[2]s
+%[2]v
 
 `,
 	},
 	{
 		epilog: "epilog",
-		out: `usage: %[1]s
+		out: `usage: %[1]v
 
-%[2]s
+%[2]v
 
 epilog
 `,
@@ -98,11 +98,11 @@ epilog
 	{
 		desc:   "    desc",
 		epilog: "epilog",
-		out: `usage: %[1]s
+		out: `usage: %[1]v
 
     desc
 
-%[2]s
+%[2]v
 
 epilog
 `,
@@ -113,13 +113,13 @@ epilog
 				Name: []string{"cmd"},
 			},
 		},
-		out: `usage: %[1]s
+		out: `usage: %[1]v
 
 commands:
 
   cmd
 
-%[2]s
+%[2]v
 
 `,
 	},
@@ -130,13 +130,13 @@ commands:
 				Desc: "desc",
 			},
 		},
-		out: `usage: %[1]s
+		out: `usage: %[1]v
 
 commands:
 
   cmd    desc
 
-%[2]s
+%[2]v
 
 `,
 	},
@@ -147,13 +147,13 @@ commands:
 				Desc: " desc \n",
 			},
 		},
-		out: `usage: %[1]s
+		out: `usage: %[1]v
 
 commands:
 
   cmd    desc
 
-%[2]s
+%[2]v
 
 `,
 	},
@@ -190,19 +190,19 @@ type commandHelpTest struct {
 
 var commandHelpTests = []commandHelpTest{
 	{
-		out: `usage: %[1]s %[2]s
+		out: `usage: %[1]v %[2]v
 `,
 	},
 	{
 		alias: []string{"alias"},
-		out: `usage: %[1]s %[2]s
+		out: `usage: %[1]v %[2]v
 
 alias: alias
 `,
 	},
 	{
 		desc: "    desc",
-		out: `usage: %[1]s %[2]s
+		out: `usage: %[1]v %[2]v
 
     desc
 
@@ -210,7 +210,7 @@ alias: alias
 	},
 	{
 		epilog: "epilog",
-		out: `usage: %[1]s %[2]s
+		out: `usage: %[1]v %[2]v
 
 epilog
 `,
@@ -219,7 +219,7 @@ epilog
 		alias:  []string{"alias"},
 		desc:   "    desc",
 		epilog: "epilog",
-		out: `usage: %[1]s %[2]s
+		out: `usage: %[1]v %[2]v
 
 alias: alias
 
@@ -235,7 +235,7 @@ epilog
 				Desc: "desc",
 			},
 		},
-		out: `usage: %[1]s %[2]s
+		out: `usage: %[1]v %[2]v
 
 commands:
 
@@ -286,7 +286,7 @@ var usageTests = []usageTest{
 	},
 	{
 		usage:  []string{"", ""},
-		format: "usage: %[1]s\n   or: %[1]s",
+		format: "usage: %[1]v\n   or: %[1]v",
 	},
 }
 
