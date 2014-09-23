@@ -42,7 +42,7 @@ var (
 
 func ShowHelp(ctx *Context, err error) error {
 	if err != nil && err != ErrCommand {
-		ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
+		ctx.CLI.Errorf("%v: %v\n", ctx.Name(), err)
 	}
 
 	fm := template.FuncMap{
