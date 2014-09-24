@@ -141,7 +141,11 @@ func Subcommand(ctx *Context) error {
 		ctx.Stack = append(ctx.Stack, cmd)
 		err = cmd.Run(ctx)
 	}
-	if err != nil {
+	switch err.(type) {
+	case nil:
+	case *Abort:
+		ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
+	default:
 		Help(ctx, err)
 	}
 	return err
@@ -163,12 +167,23 @@ func Chain(ctx *Context) error {
 			}
 			err = cmd.Run(ctx)
 		}
-		switch {
-		case err != nil:
-			Help(ctx, err)
+		if err != nil {
+			switch err.(type) {
+			case *Abort:
+				ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
+			default:
+				Help(ctx, err)
+			}
 			return err
-		case len(ctx.Args) == 0:
+		}
+		if len(ctx.Args) == 0 {
 			return nil
 		}
 	}
 }
+
+type Abort struct {
+	Err error
+}
+
+func (e Abort) Error() string { return e.Err.Error() }

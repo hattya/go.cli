@@ -47,7 +47,7 @@ func NewHelpCommand() *Command {
 				cmd, err := ctx.Command()
 				switch {
 				case err != nil:
-					return err
+					return &Abort{err}
 				case cmd == nil:
 					return ErrArgs
 				}
