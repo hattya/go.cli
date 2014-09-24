@@ -34,6 +34,30 @@ import (
 	"text/template"
 )
 
+func NewHelpCommand() *Command {
+	return &Command{
+		Name:  []string{"help"},
+		Usage: "[<command>]",
+		Desc:  "show help for a specified command",
+		Flags: NewFlagSet(),
+		Action: func(ctx *Context) error {
+			ctx.Stack = nil
+			ctx.Cmds = ctx.CLI.Cmds
+			for 0 < len(ctx.Args) {
+				cmd, err := ctx.Command()
+				switch {
+				case err != nil:
+					return err
+				case cmd == nil:
+					return ErrArgs
+				}
+				ctx.Stack = append(ctx.Stack, cmd)
+			}
+			return Help(ctx, nil)
+		},
+	}
+}
+
 var (
 	Help    = ShowHelp
 	Usage   = FormatUsage

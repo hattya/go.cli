@@ -35,6 +35,52 @@ import (
 	"github.com/hattya/go.cli"
 )
 
+func TestHelpCommand(t *testing.T) {
+	newCLI := func() (*cli.CLI, *bytes.Buffer) {
+		b := new(bytes.Buffer)
+		c := cli.NewCLI()
+		c.Stdout = b
+		c.Stderr = b
+		c.Add(cli.NewHelpCommand())
+		return c, b
+	}
+	firstLine := func(b *bytes.Buffer) string {
+		return strings.SplitN(b.String(), "\n", 2)[0]
+	}
+
+	c, b := newCLI()
+	if err := c.Run([]string{"help"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := testOut(firstLine(b), fmt.Sprintf("usage: %v", c.Name)); err != nil {
+		t.Error(err)
+	}
+
+	c, b = newCLI()
+	if err := c.Run([]string{"help", "help"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := testOut(firstLine(b), fmt.Sprintf("usage: %v help [<command>]", c.Name)); err != nil {
+		t.Error(err)
+	}
+
+	c, b = newCLI()
+	if err := c.Run([]string{"help", "foo"}); err == nil {
+		t.Fatal("expected error")
+	}
+	if err := testOut(firstLine(b), fmt.Sprintf("%v: unknown command 'foo'", c.Name)); err != nil {
+		t.Error(err)
+	}
+
+	c, b = newCLI()
+	if err := c.Run([]string{"help", "help", "foo"}); err == nil {
+		t.Fatal("expected error")
+	}
+	if err := testOut(firstLine(b), fmt.Sprintf("%v help: %v", c.Name, cli.ErrArgs)); err != nil {
+		t.Error(err)
+	}
+}
+
 var options = `options:
 
   -h, --help    show help
