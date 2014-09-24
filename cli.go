@@ -165,7 +165,6 @@ func Chain(ctx *Context) error {
 		}
 		switch {
 		case err != nil:
-			ctx.Stack = nil
 			Help(ctx, err)
 			return err
 		case len(ctx.Args) == 0:
