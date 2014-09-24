@@ -299,7 +299,7 @@ func TestCommandHelp(t *testing.T) {
 		b.Reset()
 		c := cli.NewCLI()
 		c.Add(&cli.Command{
-			Name:   append(name, tt.alias...),
+			Name:   append(append([]string{}, name...), tt.alias...),
 			Usage:  tt.usage,
 			Desc:   tt.desc,
 			Epilog: tt.epilog,

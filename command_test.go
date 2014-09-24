@@ -198,12 +198,9 @@ func TestSubcommand(t *testing.T) {
 }
 
 func TestChain(t *testing.T) {
-	action := cli.Action
-	cli.Action = cli.Chain
-	defer func() { cli.Action = action }()
-
 	newCLI := func() (*cli.CLI, []*cli.Command) {
 		c := cli.NewCLI()
+		c.Action = cli.Chain
 		c.Stdout = ioutil.Discard
 		c.Stderr = ioutil.Discard
 		for _, n := range []string{"foo", "bar", "baz"} {
