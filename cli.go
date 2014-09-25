@@ -177,17 +177,21 @@ var (
 )
 
 type Abort struct {
-	Err error
+	Err  error
+	Hint string
 }
 
 func (e Abort) Error() string { return e.Err.Error() }
 
 func ErrorHandler(ctx *Context, err error) error {
 	if err != ErrCommand {
-		switch err.(type) {
+		switch err := err.(type) {
 		case nil:
 		case *Abort:
 			ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
+			if err.Hint != "" {
+				ctx.CLI.Errorln(err.Hint)
+			}
 		default:
 			ctx.CLI.Errorf("%v: %v\n", ctx.Name(), err)
 			Help(ctx)

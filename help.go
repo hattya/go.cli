@@ -47,7 +47,10 @@ func NewHelpCommand() *Command {
 				cmd, err := ctx.Command()
 				switch {
 				case err != nil:
-					return &Abort{err}
+					return &Abort{
+						Err:  err,
+						Hint: fmt.Sprintf("type '%v help' for usage", ctx.Name()),
+					}
 				case cmd == nil:
 					return ErrArgs
 				}
