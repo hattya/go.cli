@@ -35,11 +35,6 @@ import (
 	"runtime"
 )
 
-var (
-	ErrCommand = errors.New("cli: command required")
-	ErrArgs    = errors.New("invalid arguments")
-)
-
 type CLI struct {
 	Name    string
 	Version string
@@ -66,14 +61,19 @@ func NewCLI() *CLI {
 		name = name[:len(name)-len(filepath.Ext(name))]
 	}
 	return &CLI{
-		Name:         name,
-		Flags:        NewFlagSet(),
-		Action:       DefaultAction,
-		ErrorHandler: ErrorHandler,
+		Name:  name,
+		Flags: NewFlagSet(),
 	}
 }
 
 func (c *CLI) Run(args []string) error {
+	if c.Action == nil {
+		c.Action = DefaultAction
+	}
+	if c.ErrorHandler == nil {
+		c.ErrorHandler = ErrorHandler
+	}
+
 	if c.Stdin == nil {
 		c.Stdin = os.Stdin
 	}
@@ -99,9 +99,9 @@ func (c *CLI) Run(args []string) error {
 	}
 	ctx.Args = c.Flags.Args()
 	switch {
-	case ctx.CLI.help && ctx.Bool("help"):
+	case c.help && ctx.Bool("help"):
 		return Help(ctx)
-	case ctx.CLI.version && ctx.Bool("version"):
+	case c.version && ctx.Bool("version"):
 		return Version(ctx)
 	}
 	return c.Action(ctx)
@@ -162,14 +162,19 @@ func Chain(ctx *Context) error {
 			}
 			err = cmd.Run(ctx)
 		}
-		if err != nil {
+		switch {
+		case err != nil:
 			return ctx.ErrorHandler(err)
-		}
-		if len(ctx.Args) == 0 {
+		case len(ctx.Args) == 0:
 			return nil
 		}
 	}
 }
+
+var (
+	ErrCommand = errors.New("cli: command required")
+	ErrArgs    = errors.New("invalid arguments")
+)
 
 type Abort struct {
 	Err error

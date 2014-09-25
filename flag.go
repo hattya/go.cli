@@ -122,7 +122,7 @@ func (fs *FlagSet) VisitAll(fn func(*Flag)) {
 	for i, f := range fs.list {
 		list[i] = f.Name[0]
 	}
-	sort.Sort(list)
+	list.Sort()
 	flags := make([]*Flag, len(list))
 	for i, n := range list {
 		flags[i] = fs.vars[n]
