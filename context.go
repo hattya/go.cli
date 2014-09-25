@@ -116,3 +116,7 @@ func (c *Context) Value(name string) interface{} {
 	}
 	return nil
 }
+
+func (c *Context) ErrorHandler(err error) error {
+	return c.CLI.ErrorHandler(c, err)
+}

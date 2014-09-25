@@ -48,7 +48,9 @@ type CLI struct {
 	Epilog  string
 	Cmds    []*Command
 	Flags   *FlagSet
-	Action  func(*Context) error
+
+	Action       func(*Context) error
+	ErrorHandler func(*Context, error) error
 
 	Stdin  io.Reader
 	Stdout io.Writer
@@ -64,9 +66,10 @@ func NewCLI() *CLI {
 		name = name[:len(name)-len(filepath.Ext(name))]
 	}
 	return &CLI{
-		Name:   name,
-		Flags:  NewFlagSet(),
-		Action: Action,
+		Name:         name,
+		Flags:        NewFlagSet(),
+		Action:       Action,
+		ErrorHandler: ErrorHandler,
 	}
 }
 
@@ -92,13 +95,12 @@ func (c *CLI) Run(args []string) error {
 
 	ctx := NewContext(c)
 	if err := c.Flags.Parse(args); err != nil {
-		Help(ctx, err)
-		return err
+		return ctx.ErrorHandler(err)
 	}
 	ctx.Args = c.Flags.Args()
 	switch {
 	case ctx.CLI.help && ctx.Bool("help"):
-		return Help(ctx, nil)
+		return Help(ctx)
 	case ctx.CLI.version && ctx.Bool("version"):
 		return Version(ctx)
 	}
@@ -141,14 +143,7 @@ func Subcommand(ctx *Context) error {
 		ctx.Stack = append(ctx.Stack, cmd)
 		err = cmd.Run(ctx)
 	}
-	switch err.(type) {
-	case nil:
-	case *Abort:
-		ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
-	default:
-		Help(ctx, err)
-	}
-	return err
+	return ctx.ErrorHandler(err)
 }
 
 func Chain(ctx *Context) error {
@@ -168,13 +163,7 @@ func Chain(ctx *Context) error {
 			err = cmd.Run(ctx)
 		}
 		if err != nil {
-			switch err.(type) {
-			case *Abort:
-				ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
-			default:
-				Help(ctx, err)
-			}
-			return err
+			return ctx.ErrorHandler(err)
 		}
 		if len(ctx.Args) == 0 {
 			return nil
@@ -187,3 +176,17 @@ type Abort struct {
 }
 
 func (e Abort) Error() string { return e.Err.Error() }
+
+func ErrorHandler(ctx *Context, err error) error {
+	if err != ErrCommand {
+		switch err.(type) {
+		case nil:
+		case *Abort:
+			ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
+		default:
+			ctx.CLI.Errorf("%v: %v\n", ctx.Name(), err)
+			Help(ctx)
+		}
+	}
+	return err
+}

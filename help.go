@@ -53,7 +53,7 @@ func NewHelpCommand() *Command {
 				}
 				ctx.Stack = append(ctx.Stack, cmd)
 			}
-			return Help(ctx, nil)
+			return Help(ctx)
 		},
 	}
 }
@@ -64,11 +64,7 @@ var (
 	MetaVar = FormatMetaVar
 )
 
-func ShowHelp(ctx *Context, err error) error {
-	if err != nil && err != ErrCommand {
-		ctx.CLI.Errorf("%v: %v\n", ctx.Name(), err)
-	}
-
+func ShowHelp(ctx *Context) error {
 	fm := template.FuncMap{
 		"usage":  Usage,
 		"cmd":    cmd,

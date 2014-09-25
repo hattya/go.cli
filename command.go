@@ -56,7 +56,7 @@ func (c *Command) Run(ctx *Context) error {
 		ctx.Args = ctx.Flags.Args()
 		switch {
 		case ctx.CLI.help && ctx.Bool("help"):
-			return Help(ctx, nil)
+			return Help(ctx)
 		case ctx.CLI.version && ctx.Bool("version"):
 			return Version(ctx)
 		}
