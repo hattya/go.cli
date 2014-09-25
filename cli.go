@@ -68,7 +68,7 @@ func NewCLI() *CLI {
 	return &CLI{
 		Name:         name,
 		Flags:        NewFlagSet(),
-		Action:       Action,
+		Action:       DefaultAction,
 		ErrorHandler: ErrorHandler,
 	}
 }
@@ -135,7 +135,7 @@ func (c *CLI) Errorf(format string, a ...interface{}) (int, error) {
 	return fmt.Fprintf(c.Stderr, format, a...)
 }
 
-var Action = Subcommand
+var DefaultAction = Subcommand
 
 func Subcommand(ctx *Context) error {
 	cmd, err := ctx.Command()
