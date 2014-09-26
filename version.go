@@ -26,6 +26,17 @@
 
 package cli
 
+func NewVersionCommand() *Command {
+	return &Command{
+		Name:  []string{"version"},
+		Desc:  "show version information",
+		Flags: NewFlagSet(),
+		Action: func(ctx *Context) error {
+			return Version(ctx)
+		},
+	}
+}
+
 var Version = ShowVersion
 
 func ShowVersion(ctx *Context) error {

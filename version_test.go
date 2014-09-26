@@ -37,6 +37,27 @@ import (
 var versionOut = `%v version %v
 `
 
+func TestVersionCommand(t *testing.T) {
+	var b bytes.Buffer
+	args := []string{"version"}
+	for _, v := range [][]string{
+		{"", "unknown"},
+		{"1.0", "1.0"},
+	} {
+		b.Reset()
+		c := cli.NewCLI()
+		c.Version = v[0]
+		c.Stdout = &b
+		c.Add(cli.NewVersionCommand())
+		if err := c.Run(args); err != nil {
+			t.Fatal(err)
+		}
+		if err := testOut(b.String(), fmt.Sprintf(versionOut, c.Name, v[1])); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
 func TestVersion(t *testing.T) {
 	var b bytes.Buffer
 	args := []string{"--version"}
