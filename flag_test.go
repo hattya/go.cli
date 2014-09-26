@@ -122,6 +122,10 @@ func TestFlagSet(t *testing.T) {
 		t.Errorf("expected %v, got %v", e, g)
 	}
 
+	if err := flags.MetaVar("", ""); err == nil {
+		t.Error("expected error")
+	}
+
 	flags.Set("var", "set")
 	if g, e := flags.Lookup("var").Value.Get(), "set"; g != e {
 		t.Errorf("expected %v, got %v", e, g)

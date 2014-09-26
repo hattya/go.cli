@@ -93,7 +93,14 @@ func (fs *FlagSet) Parse(args []string) error { return fs.error(fs.fs.Parse(args
 
 func (fs *FlagSet) Lookup(name string) *Flag { return fs.vars[name] }
 
-func (fs *FlagSet) MetaVar(name, metaVar string) { fs.vars[name].MetaVar = metaVar }
+func (fs *FlagSet) MetaVar(name, metaVar string) error {
+	f, ok := fs.vars[name]
+	if !ok {
+		return FlagError("no such flag -" + name)
+	}
+	f.MetaVar = metaVar
+	return nil
+}
 
 func (fs *FlagSet) Set(name, value string) error { return fs.error(fs.fs.Set(name, value)) }
 
