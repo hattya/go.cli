@@ -197,6 +197,24 @@ func TestSubcommand(t *testing.T) {
 	}
 }
 
+func TestSubcommandPanic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("expected panic")
+		}
+	}()
+
+	c := cli.NewCLI()
+	c.Add(&cli.Command{
+		Name: []string{"cmd"},
+	})
+	c.Cmds[0].Add(&cli.Command{
+		Name:  []string{"subcmd"},
+		Flags: cli.NewFlagSet(),
+	})
+	c.Run([]string{"cmd", "subcmd"})
+}
+
 func TestChain(t *testing.T) {
 	newCLI := func() (*cli.CLI, []*cli.Command) {
 		c := cli.NewCLI()

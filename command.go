@@ -48,6 +48,9 @@ func (c *Command) Run(ctx *Context) error {
 		ctx.Flags = NewFlagSet()
 		ctx.CLI.Flags.VisitAll(ctx.Flags.Add)
 		for _, cmd := range ctx.Stack {
+			if cmd.Flags == nil {
+				panic(ErrFlags)
+			}
 			cmd.Flags.VisitAll(ctx.Flags.Add)
 		}
 		if err := ctx.Flags.Parse(ctx.Args); err != nil {

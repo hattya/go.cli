@@ -173,6 +173,7 @@ func Chain(ctx *Context) error {
 
 var (
 	ErrCommand = errors.New("cli: command required")
+	ErrFlags   = errors.New("cli: flag parsing is disabled")
 	ErrArgs    = errors.New("invalid arguments")
 )
 
