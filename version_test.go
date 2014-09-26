@@ -61,35 +61,30 @@ func TestVersionCommand(t *testing.T) {
 func TestVersion(t *testing.T) {
 	var b bytes.Buffer
 	args := []string{"--version"}
+	for _, v := range [][]string{
+		{"", "unknown"},
+		{"1.0", "1.0"},
+	} {
+		b.Reset()
+		c := cli.NewCLI()
+		c.Version = v[0]
+		c.Stdout = &b
+		if err := c.Run(args); err != nil {
+			t.Fatal(err)
+		}
+		if err := testOut(b.String(), fmt.Sprintf(versionOut, c.Name, v[1])); err != nil {
+			t.Error(err)
+		}
+	}
 
+	b.Reset()
 	c := cli.NewCLI()
-	c.Stdout = &b
-	if err := c.Run(args); err != nil {
-		t.Fatal(err)
-	}
-	if err := testOut(b.String(), fmt.Sprintf(versionOut, c.Name, "unknown")); err != nil {
-		t.Error(err)
-	}
-
-	b.Reset()
-	c = cli.NewCLI()
 	c.Version = "1.0"
 	c.Stdout = &b
-	if err := c.Run(args); err != nil {
-		t.Fatal(err)
-	}
-	if err := testOut(b.String(), fmt.Sprintf(versionOut, c.Name, c.Version)); err != nil {
-		t.Error(err)
-	}
-
-	b.Reset()
-	c = cli.NewCLI()
-	c.Version = "1.0"
 	c.Add(&cli.Command{
 		Name:  []string{"cmd"},
 		Flags: cli.NewFlagSet(),
 	})
-	c.Stdout = &b
 	args = []string{"cmd", "--version"}
 	if err := c.Run(args); err != nil {
 		t.Fatal(err)

@@ -301,6 +301,7 @@ func TestCommandHelp(t *testing.T) {
 	for _, tt := range commandHelpTests {
 		b.Reset()
 		c := cli.NewCLI()
+		c.Stdout = b
 		c.Add(&cli.Command{
 			Name:   append(append([]string{}, name...), tt.alias...),
 			Usage:  tt.usage,
@@ -309,7 +310,6 @@ func TestCommandHelp(t *testing.T) {
 			Cmds:   tt.cmds,
 			Flags:  cli.NewFlagSet(),
 		})
-		c.Stdout = b
 		if err := c.Run(args); err != nil {
 			t.Fatal(err)
 		}
