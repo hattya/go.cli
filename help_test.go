@@ -37,6 +37,7 @@ import (
 
 type helpCommandTest struct {
 	args []string
+	cmds []*cli.Command
 	err  bool
 	out  string
 }
@@ -60,6 +61,19 @@ var helpCommandTests = []helpCommandTest{
 		err:  true,
 		out:  "%v help: " + cli.ErrArgs.Error(),
 	},
+	{
+		args: []string{"cmd", "help"},
+		out:  "usage: %v",
+		cmds: []*cli.Command{
+			&cli.Command{
+				Name: []string{"cmd"},
+				Cmds: []*cli.Command{
+					cli.NewHelpCommand(),
+				},
+				Flags: cli.NewFlagSet(),
+			},
+		},
+	},
 }
 
 func TestHelpCommand(t *testing.T) {
@@ -67,6 +81,7 @@ func TestHelpCommand(t *testing.T) {
 		for _, action := range []func(*cli.Context) error{cli.Subcommand, cli.Chain} {
 			var b bytes.Buffer
 			c := cli.NewCLI()
+			c.Cmds = tt.cmds
 			c.Action = action
 			c.Stdout = &b
 			c.Stderr = &b

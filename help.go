@@ -41,8 +41,12 @@ func NewHelpCommand() *Command {
 		Desc:  "show help for a specified command",
 		Flags: NewFlagSet(),
 		Action: func(ctx *Context) error {
+			if 1 < len(ctx.Stack) {
+				ctx.Cmds = ctx.Stack[len(ctx.Stack)-2].Cmds
+			} else {
+				ctx.Cmds = ctx.CLI.Cmds
+			}
 			ctx.Stack = nil
-			ctx.Cmds = ctx.CLI.Cmds
 			for 0 < len(ctx.Args) {
 				cmd, err := ctx.Command()
 				switch {
