@@ -79,42 +79,39 @@ func (c *Context) Command() (cmd *Command, err error) {
 }
 
 func (c *Context) Bool(name string) bool {
-	return c.Value(name).(bool)
+	return c.Flags.Get(name).(bool)
 }
 
 func (c *Context) Duration(name string) time.Duration {
-	return c.Value(name).(time.Duration)
+	return c.Flags.Get(name).(time.Duration)
 }
 
 func (c *Context) Float64(name string) float64 {
-	return c.Value(name).(float64)
+	return c.Flags.Get(name).(float64)
 }
 
 func (c *Context) Int(name string) int {
-	return c.Value(name).(int)
+	return c.Flags.Get(name).(int)
 }
 
 func (c *Context) Int64(name string) int64 {
-	return c.Value(name).(int64)
+	return c.Flags.Get(name).(int64)
 }
 
 func (c *Context) String(name string) string {
-	return c.Value(name).(string)
+	return c.Flags.Get(name).(string)
 }
 
 func (c *Context) Uint(name string) uint {
-	return c.Value(name).(uint)
+	return c.Flags.Get(name).(uint)
 }
 
 func (c *Context) Uint64(name string) uint64 {
-	return c.Value(name).(uint64)
+	return c.Flags.Get(name).(uint64)
 }
 
 func (c *Context) Value(name string) interface{} {
-	if f := c.Flags.Lookup(name); f != nil {
-		return f.Value.Get()
-	}
-	return nil
+	return c.Flags.Get(name)
 }
 
 func (c *Context) ErrorHandler(err error) error {

@@ -104,6 +104,13 @@ func (fs *FlagSet) MetaVar(name, metaVar string) error {
 
 func (fs *FlagSet) Set(name, value string) error { return fs.error(fs.fs.Set(name, value)) }
 
+func (fs *FlagSet) Get(name string) interface{} {
+	if f := fs.Lookup(name); f != nil {
+		return f.Value.Get()
+	}
+	return nil
+}
+
 func (fs *FlagSet) error(err error) error {
 	if err != nil {
 		return FlagError(err.Error())
