@@ -40,6 +40,7 @@ type Flag struct {
 	Name    []string
 	Usage   string
 	Value   flag.Getter
+	Default string
 	MetaVar string
 	EnvVar  string
 }
@@ -288,6 +289,7 @@ func (fs *FlagSet) each(name, envVar string, fn func(string)) *Flag {
 	ff := fs.fs.Lookup(f.Name[0])
 	f.Usage = ff.Usage
 	f.Value = ff.Value.(flag.Getter)
+	f.Default = ff.DefValue
 	if f.EnvVar != "" {
 		if s := os.Getenv(f.EnvVar); s != "" {
 			f.Value.Set(s)
