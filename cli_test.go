@@ -126,6 +126,87 @@ func TestCLIOut(t *testing.T) {
 	}
 }
 
+type errorHandlerTest struct {
+	err error
+	out string
+}
+
+var errorHandlerTests = []errorHandlerTest{
+	{
+		err: nil,
+		out: "",
+	},
+	{
+		err: cli.ErrCommand,
+		out: `usage: %[1]v
+`,
+	},
+	{
+		err: &cli.Abort{
+			Err: fmt.Errorf("abort"),
+		},
+		out: `%[1]v: abort
+`,
+	},
+	{
+		err: &cli.Abort{
+			Err:  fmt.Errorf("abort"),
+			Hint: "hint",
+		},
+		out: `%[1]v: abort
+hint
+`,
+	},
+	{
+		err: cli.FlagError("flag error"),
+		out: `%[1]v: flag error
+usage: %[1]v
+`,
+	},
+	{
+		err: &cli.CommandError{
+			Name: "cmd",
+		},
+		out: `%[1]v: unknown command 'cmd'
+usage: %[1]v
+`,
+	},
+	{
+		err: &cli.CommandError{
+			Name: "b",
+			List: []string{"bar", "baz"},
+		},
+		out: `%[1]v: command 'b' is ambiguous (bar, baz)
+usage: %[1]v
+`,
+	},
+	{
+		err: fmt.Errorf("error"),
+		out: `%[1]v: error
+usage: %[1]v
+`,
+	},
+}
+
+func TestErrorHandler(t *testing.T) {
+	var b bytes.Buffer
+	c := cli.NewCLI()
+	c.Stdout = &b
+	c.Stderr = &b
+	ctx := cli.NewContext(c)
+	for _, tt := range errorHandlerTests {
+		b.Reset()
+		cli.ErrorHandler(ctx, tt.err)
+		var out string
+		if tt.out != "" {
+			out = fmt.Sprintf(tt.out, ctx.Name())
+		}
+		if err := testOut(b.String(), out); err != nil {
+			t.Error(err)
+		}
+	}
+}
+
 func testOut(g, e string) error {
 	if g != e {
 		return fmt.Errorf("output differ\nexpected: %q\n     got: %q", e, g)
