@@ -78,7 +78,7 @@ var helpCommandTests = []helpCommandTest{
 
 func TestHelpCommand(t *testing.T) {
 	for _, tt := range helpCommandTests {
-		for _, action := range []func(*cli.Context) error{cli.Subcommand, cli.Chain} {
+		for _, action := range []cli.Action{cli.Subcommand, cli.Chain} {
 			var b bytes.Buffer
 			c := cli.NewCLI()
 			c.Cmds = tt.cmds

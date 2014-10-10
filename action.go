@@ -26,6 +26,8 @@
 
 package cli
 
+type Action func(*Context) error
+
 var DefaultAction = Subcommand
 
 func Subcommand(ctx *Context) error {

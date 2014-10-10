@@ -44,7 +44,7 @@ type CLI struct {
 	Cmds    []*Command
 	Flags   *FlagSet
 
-	Action       func(*Context) error
+	Action       Action
 	ErrorHandler func(*Context, error) error
 
 	Stdin  io.Reader
