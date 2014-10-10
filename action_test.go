@@ -218,3 +218,31 @@ func TestChain(t *testing.T) {
 		t.Error("unexpected error:", err)
 	}
 }
+
+func TestOption(t *testing.T) {
+	newCLI := func() (*cli.CLI, *cli.Command) {
+		c := cli.NewCLI()
+		c.Action = cli.Option(func(*cli.Context) error {
+			return nil
+		})
+		c.Stdout = ioutil.Discard
+		c.Stderr = ioutil.Discard
+		c.Add(&cli.Command{
+			Name:  []string{"cmd"},
+			Flags: cli.NewFlagSet(),
+		})
+		return c, c.Cmds[0]
+	}
+
+	c, _ := newCLI()
+	args := []string{}
+	if err := c.Run(args); err != nil {
+		t.Error(err)
+	}
+
+	c, cmd := newCLI()
+	args = []string{cmd.Name[0]}
+	if err := c.Run(args); err != nil {
+		t.Error(err)
+	}
+}

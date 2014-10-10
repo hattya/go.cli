@@ -63,3 +63,12 @@ func Chain(ctx *Context) error {
 		}
 	}
 }
+
+func Option(action Action) Action {
+	return func(ctx *Context) error {
+		if 0 < len(ctx.Args) {
+			return DefaultAction(ctx)
+		}
+		return ctx.ErrorHandler(action(ctx))
+	}
+}
