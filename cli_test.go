@@ -176,14 +176,13 @@ usage: %[1]v
 			Name: "b",
 			List: []string{"bar", "baz"},
 		},
-		out: `%[1]v: command 'b' is ambiguous (bar, baz)
-usage: %[1]v
+		out: `%[1]v: command 'b' is ambiguous
+    bar baz
 `,
 	},
 	{
 		err: fmt.Errorf("error"),
 		out: `%[1]v: error
-usage: %[1]v
 `,
 	},
 }

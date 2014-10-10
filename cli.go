@@ -33,6 +33,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 )
 
 type CLI struct {
@@ -156,11 +157,23 @@ func ErrorHandler(ctx *Context, err error) error {
 		if err.Hint != "" {
 			ctx.CLI.Errorln(err.Hint)
 		}
+	case FlagError:
+		ctx.CLI.Errorf("%v: %v\n", ctx.Name(), err)
+		Help(ctx)
+	case *CommandError:
+		if len(err.List) == 0 {
+			ctx.CLI.Errorf("%v: %v\n", ctx.Name(), err)
+			Help(ctx)
+		} else {
+			ctx.CLI.Errorf("%v: command '%v' is ambiguous\n", ctx.Name(), err.Name)
+			ctx.CLI.Errorf("    %v\n", strings.Join(err.List, " "))
+		}
 	default:
-		if err != ErrCommand {
+		if err == ErrCommand {
+			Help(ctx)
+		} else {
 			ctx.CLI.Errorf("%v: %v\n", ctx.Name(), err)
 		}
-		Help(ctx)
 	}
 	return err
 }
