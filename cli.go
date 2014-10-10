@@ -135,42 +135,6 @@ func (c *CLI) Errorf(format string, a ...interface{}) (int, error) {
 	return fmt.Fprintf(c.Stderr, format, a...)
 }
 
-var DefaultAction = Subcommand
-
-func Subcommand(ctx *Context) error {
-	cmd, err := ctx.Command()
-	if cmd != nil {
-		ctx.Stack = append(ctx.Stack, cmd)
-		err = cmd.Run(ctx)
-	}
-	return ctx.ErrorHandler(err)
-}
-
-func Chain(ctx *Context) error {
-	if 0 < len(ctx.Stack) {
-		return nil
-	}
-
-	for {
-		cmd, err := ctx.Command()
-		if cmd != nil {
-			ctx.Cmds = ctx.CLI.Cmds
-			if len(ctx.Stack) == 0 {
-				ctx.Stack = []*Command{cmd}
-			} else {
-				ctx.Stack[0] = cmd
-			}
-			err = cmd.Run(ctx)
-		}
-		switch {
-		case err != nil:
-			return ctx.ErrorHandler(err)
-		case len(ctx.Args) == 0:
-			return nil
-		}
-	}
-}
-
 var (
 	ErrCommand = errors.New("cli: command required")
 	ErrFlags   = errors.New("cli: flag parsing is disabled")
