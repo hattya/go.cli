@@ -45,6 +45,7 @@ type CLI struct {
 	Cmds    []*Command
 	Flags   *FlagSet
 
+	Prepare      func(*Context, *Command) error
 	Action       Action
 	ErrorHandler func(*Context, error) error
 

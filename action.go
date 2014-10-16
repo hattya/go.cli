@@ -33,8 +33,10 @@ var DefaultAction = Subcommand
 func Subcommand(ctx *Context) error {
 	cmd, err := ctx.Command()
 	if cmd != nil {
-		ctx.Stack = append(ctx.Stack, cmd)
-		err = cmd.Run(ctx)
+		if err = ctx.Prepare(cmd); err == nil {
+			ctx.Stack = append(ctx.Stack, cmd)
+			err = cmd.Run(ctx)
+		}
 	}
 	return ctx.ErrorHandler(err)
 }
@@ -47,13 +49,15 @@ func Chain(ctx *Context) error {
 	for {
 		cmd, err := ctx.Command()
 		if cmd != nil {
-			ctx.Cmds = ctx.CLI.Cmds
-			if len(ctx.Stack) == 0 {
-				ctx.Stack = []*Command{cmd}
-			} else {
-				ctx.Stack[0] = cmd
+			if err = ctx.Prepare(cmd); err == nil {
+				ctx.Cmds = ctx.CLI.Cmds
+				if len(ctx.Stack) == 0 {
+					ctx.Stack = []*Command{cmd}
+				} else {
+					ctx.Stack[0] = cmd
+				}
+				err = cmd.Run(ctx)
 			}
-			err = cmd.Run(ctx)
 		}
 		switch {
 		case err != nil:
@@ -69,6 +73,10 @@ func Option(action Action) Action {
 		if 0 < len(ctx.Args) {
 			return DefaultAction(ctx)
 		}
-		return ctx.ErrorHandler(action(ctx))
+		err := ctx.Prepare(nil)
+		if err == nil {
+			err = action(ctx)
+		}
+		return ctx.ErrorHandler(err)
 	}
 }

@@ -126,6 +126,28 @@ func TestCLIOut(t *testing.T) {
 	}
 }
 
+func TestPrepare(t *testing.T) {
+	c := cli.NewCLI()
+	c.Stdout = ioutil.Discard
+	c.Stderr = ioutil.Discard
+	c.Prepare = func(ctx *cli.Context, cmd *cli.Command) error {
+		cmd.Data = cmd.Data.(int) + 1
+		return nil
+	}
+	c.Add(&cli.Command{
+		Name: []string{"true"},
+		Data: 0,
+	})
+
+	args := []string{"true"}
+	if err := c.Run(args); err != nil {
+		t.Fatal(err)
+	}
+	if g, e := c.Cmds[0].Data, 1; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+}
+
 type errorHandlerTest struct {
 	err error
 	out string

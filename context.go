@@ -114,6 +114,13 @@ func (c *Context) Value(name string) interface{} {
 	return c.Flags.Get(name)
 }
 
+func (c *Context) Prepare(cmd *Command) error {
+	if c.CLI.Prepare != nil {
+		return c.CLI.Prepare(c, cmd)
+	}
+	return nil
+}
+
 func (c *Context) ErrorHandler(err error) error {
 	return c.CLI.ErrorHandler(c, err)
 }
