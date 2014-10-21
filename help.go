@@ -72,14 +72,7 @@ var (
 )
 
 func ShowHelp(ctx *Context) error {
-	fm := template.FuncMap{
-		"usage":  Usage,
-		"cmd":    cmd,
-		"cmds":   cmds,
-		"format": format,
-		"flags":  flags,
-	}
-	t := template.Must(template.New("help").Funcs(fm).Parse(helpTmpl))
+	t := template.Must(template.New("help").Funcs(FuncMap()).Parse(helpTmpl))
 	w := tabwriter.NewWriter(ctx.CLI.Stdout, 0, 8, 4, ' ', 0)
 	defer w.Flush()
 	return t.Execute(w, ctx)
@@ -100,6 +93,16 @@ options:
 {{.Epilog}}
 {{else if or .Desc (lt 0 (len .Cmds)) (lt 0 (len $flags))}}
 {{end}}{{end}}`
+
+func FuncMap() template.FuncMap {
+	return template.FuncMap{
+		"usage":  Usage,
+		"cmd":    cmd,
+		"cmds":   cmds,
+		"format": format,
+		"flags":  flags,
+	}
+}
 
 func cmd(ctx *Context) *Command {
 	if len(ctx.Stack) == 0 {
