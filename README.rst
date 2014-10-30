@@ -25,8 +25,9 @@ Usage
    	"github.com/hattya/go.cli"
    )
 
+   var app = cli.NewCLI()
+
    func main() {
-   	app := cli.NewCLI()
    	app.Version = "1.0"
    	app.Usage = "<options> hello"
    	app.Add(&cli.Command{
@@ -38,10 +39,8 @@ Usage
    	})
 
    	if err := app.Run(os.Args[1:]); err != nil {
-   		switch err.(type) {
-   		case cli.FlagError:
+   		if _, ok := err.(cli.FlagError); ok {
    			os.Exit(2)
-   		case *cli.CommandError:
    		}
    		os.Exit(1)
    	}
