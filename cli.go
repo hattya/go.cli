@@ -68,73 +68,73 @@ func NewCLI() *CLI {
 	}
 }
 
-func (c *CLI) Run(args []string) error {
-	if c.Action == nil {
-		c.Action = DefaultAction
+func (ui *CLI) Run(args []string) error {
+	if ui.Action == nil {
+		ui.Action = DefaultAction
 	}
-	if c.ErrorHandler == nil {
-		c.ErrorHandler = ErrorHandler
-	}
-
-	if c.Stdin == nil {
-		c.Stdin = os.Stdin
-	}
-	if c.Stdout == nil {
-		c.Stdout = os.Stdout
-	}
-	if c.Stderr == nil {
-		c.Stderr = os.Stderr
+	if ui.ErrorHandler == nil {
+		ui.ErrorHandler = ErrorHandler
 	}
 
-	if c.Flags.Lookup("h") == nil && c.Flags.Lookup("help") == nil {
-		c.Flags.Bool("h, help", false, "show help")
-		c.help = true
+	if ui.Stdin == nil {
+		ui.Stdin = os.Stdin
 	}
-	if c.Flags.Lookup("version") == nil {
-		c.Flags.Bool("version", false, "show version information")
-		c.version = true
+	if ui.Stdout == nil {
+		ui.Stdout = os.Stdout
+	}
+	if ui.Stderr == nil {
+		ui.Stderr = os.Stderr
 	}
 
-	ctx := NewContext(c)
-	if err := c.Flags.Parse(args); err != nil {
+	if ui.Flags.Lookup("h") == nil && ui.Flags.Lookup("help") == nil {
+		ui.Flags.Bool("h, help", false, "show help")
+		ui.help = true
+	}
+	if ui.Flags.Lookup("version") == nil {
+		ui.Flags.Bool("version", false, "show version information")
+		ui.version = true
+	}
+
+	ctx := NewContext(ui)
+	if err := ui.Flags.Parse(args); err != nil {
 		return ctx.ErrorHandler(err)
 	}
-	ctx.Args = c.Flags.Args()
+	ctx.Args = ui.Flags.Args()
 	switch {
-	case c.help && ctx.Bool("help"):
+	case ui.help && ctx.Bool("help"):
 		return Help(ctx)
-	case c.version && ctx.Bool("version"):
+	case ui.version && ctx.Bool("version"):
 		return Version(ctx)
 	}
-	return c.Action(ctx)
+	return ui.Action(ctx)
 }
 
-func (c *CLI) Add(cmd *Command) {
-	c.Cmds = append(c.Cmds, cmd)
+func (ui *CLI) Add(cmd *Command) {
+	ui.Cmds = append(ui.Cmds, cmd)
 }
 
-func (c *CLI) Print(a ...interface{}) (int, error) {
-	return fmt.Fprint(c.Stdout, a...)
+func (ui *CLI) Print(a ...interface{}) (int, error) {
+	return fmt.Fprint(ui.Stdout, a...)
 }
 
-func (c *CLI) Println(a ...interface{}) (int, error) {
-	return fmt.Fprintln(c.Stdout, a...)
+func (ui *CLI) Println(a ...interface{}) (int, error) {
+	return fmt.Fprintln(ui.Stdout, a...)
 }
 
-func (c *CLI) Printf(format string, a ...interface{}) (int, error) {
-	return fmt.Fprintf(c.Stdout, format, a...)
+func (ui *CLI) Printf(format string, a ...interface{}) (int, error) {
+	return fmt.Fprintf(ui.Stdout, format, a...)
 }
 
-func (c *CLI) Error(a ...interface{}) (int, error) {
-	return fmt.Fprint(c.Stderr, a...)
+func (ui *CLI) Error(a ...interface{}) (int, error) {
+	return fmt.Fprint(ui.Stderr, a...)
 }
 
-func (c *CLI) Errorln(a ...interface{}) (int, error) {
-	return fmt.Fprintln(c.Stderr, a...)
+func (ui *CLI) Errorln(a ...interface{}) (int, error) {
+	return fmt.Fprintln(ui.Stderr, a...)
 }
 
-func (c *CLI) Errorf(format string, a ...interface{}) (int, error) {
-	return fmt.Fprintf(c.Stderr, format, a...)
+func (ui *CLI) Errorf(format string, a ...interface{}) (int, error) {
+	return fmt.Fprintf(ui.Stderr, format, a...)
 }
 
 var (
@@ -153,11 +153,6 @@ func (e Abort) Error() string { return e.Err.Error() }
 func ErrorHandler(ctx *Context, err error) error {
 	switch err := err.(type) {
 	case nil:
-	case *Abort:
-		ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
-		if err.Hint != "" {
-			ctx.CLI.Errorln(err.Hint)
-		}
 	case FlagError:
 		ctx.CLI.Errorf("%v: %v\n", ctx.Name(), err)
 		Help(ctx)
@@ -168,6 +163,11 @@ func ErrorHandler(ctx *Context, err error) error {
 		} else {
 			ctx.CLI.Errorf("%v: command '%v' is ambiguous\n", ctx.Name(), err.Name)
 			ctx.CLI.Errorf("    %v\n", strings.Join(err.List, " "))
+		}
+	case *Abort:
+		ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
+		if err.Hint != "" {
+			ctx.CLI.Errorln(err.Hint)
 		}
 	default:
 		if err == ErrCommand {

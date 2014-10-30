@@ -41,86 +41,86 @@ type Context struct {
 	Data  interface{}
 }
 
-func NewContext(cli *CLI) *Context {
+func NewContext(ui *CLI) *Context {
 	return &Context{
-		CLI:   cli,
-		Cmds:  cli.Cmds,
-		Flags: cli.Flags,
-		Args:  cli.Flags.Args(),
+		CLI:   ui,
+		Cmds:  ui.Cmds,
+		Flags: ui.Flags,
+		Args:  ui.Flags.Args(),
 	}
 }
 
-func (c *Context) Name() string {
-	if 0 < len(c.Stack) {
+func (ctx *Context) Name() string {
+	if 0 < len(ctx.Stack) {
 		var b bytes.Buffer
-		b.WriteString(c.CLI.Name)
-		for _, cmd := range c.Stack {
+		b.WriteString(ctx.CLI.Name)
+		for _, cmd := range ctx.Stack {
 			b.WriteRune(' ')
 			b.WriteString(cmd.Name[0])
 		}
 		return b.String()
 	}
-	return c.CLI.Name
+	return ctx.CLI.Name
 }
 
-func (c *Context) Command() (cmd *Command, err error) {
+func (ctx *Context) Command() (cmd *Command, err error) {
 	switch {
-	case len(c.Cmds) == 0:
-	case len(c.Args) == 0:
+	case len(ctx.Cmds) == 0:
+	case len(ctx.Args) == 0:
 		err = ErrCommand
 	default:
-		cmd, err = FindCommand(c.Cmds, c.Args[0])
+		cmd, err = FindCommand(ctx.Cmds, ctx.Args[0])
 		if err == nil {
-			c.Cmds = cmd.Cmds
-			c.Args = c.Args[1:]
+			ctx.Cmds = cmd.Cmds
+			ctx.Args = ctx.Args[1:]
 		}
 	}
 	return
 }
 
-func (c *Context) Bool(name string) bool {
-	return c.Flags.Get(name).(bool)
+func (ctx *Context) Bool(name string) bool {
+	return ctx.Flags.Get(name).(bool)
 }
 
-func (c *Context) Duration(name string) time.Duration {
-	return c.Flags.Get(name).(time.Duration)
+func (ctx *Context) Duration(name string) time.Duration {
+	return ctx.Flags.Get(name).(time.Duration)
 }
 
-func (c *Context) Float64(name string) float64 {
-	return c.Flags.Get(name).(float64)
+func (ctx *Context) Float64(name string) float64 {
+	return ctx.Flags.Get(name).(float64)
 }
 
-func (c *Context) Int(name string) int {
-	return c.Flags.Get(name).(int)
+func (ctx *Context) Int(name string) int {
+	return ctx.Flags.Get(name).(int)
 }
 
-func (c *Context) Int64(name string) int64 {
-	return c.Flags.Get(name).(int64)
+func (ctx *Context) Int64(name string) int64 {
+	return ctx.Flags.Get(name).(int64)
 }
 
-func (c *Context) String(name string) string {
-	return c.Flags.Get(name).(string)
+func (ctx *Context) String(name string) string {
+	return ctx.Flags.Get(name).(string)
 }
 
-func (c *Context) Uint(name string) uint {
-	return c.Flags.Get(name).(uint)
+func (ctx *Context) Uint(name string) uint {
+	return ctx.Flags.Get(name).(uint)
 }
 
-func (c *Context) Uint64(name string) uint64 {
-	return c.Flags.Get(name).(uint64)
+func (ctx *Context) Uint64(name string) uint64 {
+	return ctx.Flags.Get(name).(uint64)
 }
 
-func (c *Context) Value(name string) interface{} {
-	return c.Flags.Get(name)
+func (ctx *Context) Value(name string) interface{} {
+	return ctx.Flags.Get(name)
 }
 
-func (c *Context) Prepare(cmd *Command) error {
-	if c.CLI.Prepare != nil {
-		return c.CLI.Prepare(c, cmd)
+func (ctx *Context) Prepare(cmd *Command) error {
+	if ctx.CLI.Prepare != nil {
+		return ctx.CLI.Prepare(ctx, cmd)
 	}
 	return nil
 }
 
-func (c *Context) ErrorHandler(err error) error {
-	return c.CLI.ErrorHandler(c, err)
+func (ctx *Context) ErrorHandler(err error) error {
+	return ctx.CLI.ErrorHandler(ctx, err)
 }
