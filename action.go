@@ -50,7 +50,7 @@ func Chain(ctx *Context) error {
 		cmd, err := ctx.Command()
 		if cmd != nil {
 			if err = ctx.Prepare(cmd); err == nil {
-				ctx.Cmds = ctx.CLI.Cmds
+				ctx.Cmds = ctx.UI.Cmds
 				if len(ctx.Stack) == 0 {
 					ctx.Stack = []*Command{cmd}
 				} else {

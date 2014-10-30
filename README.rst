@@ -33,7 +33,7 @@ Usage
    	app.Add(&cli.Command{
    		Name: []string{"hello"},
    		Action: func(ctx *cli.Context) error {
-   			ctx.CLI.Println("Hello World!")
+   			ctx.UI.Println("Hello World!")
    			return nil
    		},
    	})

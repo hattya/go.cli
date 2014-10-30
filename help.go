@@ -44,7 +44,7 @@ func NewHelpCommand() *Command {
 			if 1 < len(ctx.Stack) {
 				ctx.Cmds = ctx.Stack[len(ctx.Stack)-2].Cmds
 			} else {
-				ctx.Cmds = ctx.CLI.Cmds
+				ctx.Cmds = ctx.UI.Cmds
 			}
 			ctx.Stack = nil
 			for 0 < len(ctx.Args) {
@@ -73,13 +73,13 @@ var (
 
 func ShowHelp(ctx *Context) error {
 	t := template.Must(template.New("help").Funcs(FuncMap()).Parse(helpTmpl))
-	w := tabwriter.NewWriter(ctx.CLI.Stdout, 0, 8, 4, ' ', 0)
+	w := tabwriter.NewWriter(ctx.UI.Stdout, 0, 8, 4, ' ', 0)
 	defer w.Flush()
 	return t.Execute(w, ctx)
 }
 
 const helpTmpl = `{{range usage .}}{{.}}
-{{end}}{{with or (cmd .) .CLI}}{{if .Desc}}
+{{end}}{{with or (cmd .) .UI}}{{if .Desc}}
 {{.Desc}}
 {{end}}{{range $i, $cmd := cmds .Cmds}}{{if eq $i 0}}
 commands:
@@ -145,7 +145,7 @@ func FormatUsage(ctx *Context) []string {
 		cmd = ctx.Stack[len(ctx.Stack)-1]
 		u = cmd.Usage
 	} else {
-		u = ctx.CLI.Usage
+		u = ctx.UI.Usage
 	}
 	var usage []string
 	switch v := u.(type) {

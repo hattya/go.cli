@@ -154,26 +154,26 @@ func ErrorHandler(ctx *Context, err error) error {
 	switch err := err.(type) {
 	case nil:
 	case FlagError:
-		ctx.CLI.Errorf("%v: %v\n", ctx.Name(), err)
+		ctx.UI.Errorf("%v: %v\n", ctx.Name(), err)
 		Help(ctx)
 	case *CommandError:
 		if len(err.List) == 0 {
-			ctx.CLI.Errorf("%v: %v\n", ctx.Name(), err)
+			ctx.UI.Errorf("%v: %v\n", ctx.Name(), err)
 			Help(ctx)
 		} else {
-			ctx.CLI.Errorf("%v: command '%v' is ambiguous\n", ctx.Name(), err.Name)
-			ctx.CLI.Errorf("    %v\n", strings.Join(err.List, " "))
+			ctx.UI.Errorf("%v: command '%v' is ambiguous\n", ctx.Name(), err.Name)
+			ctx.UI.Errorf("    %v\n", strings.Join(err.List, " "))
 		}
 	case *Abort:
-		ctx.CLI.Errorf("%v: %v\n", ctx.CLI.Name, err)
+		ctx.UI.Errorf("%v: %v\n", ctx.UI.Name, err)
 		if err.Hint != "" {
-			ctx.CLI.Errorln(err.Hint)
+			ctx.UI.Errorln(err.Hint)
 		}
 	default:
 		if err == ErrCommand {
 			Help(ctx)
 		} else {
-			ctx.CLI.Errorf("%v: %v\n", ctx.Name(), err)
+			ctx.UI.Errorf("%v: %v\n", ctx.Name(), err)
 		}
 	}
 	return err

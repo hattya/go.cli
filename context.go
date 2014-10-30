@@ -32,7 +32,7 @@ import (
 )
 
 type Context struct {
-	CLI   *CLI
+	UI    *CLI
 	Stack []*Command
 
 	Cmds  []*Command
@@ -43,7 +43,7 @@ type Context struct {
 
 func NewContext(ui *CLI) *Context {
 	return &Context{
-		CLI:   ui,
+		UI:    ui,
 		Cmds:  ui.Cmds,
 		Flags: ui.Flags,
 		Args:  ui.Flags.Args(),
@@ -53,14 +53,14 @@ func NewContext(ui *CLI) *Context {
 func (ctx *Context) Name() string {
 	if 0 < len(ctx.Stack) {
 		var b bytes.Buffer
-		b.WriteString(ctx.CLI.Name)
+		b.WriteString(ctx.UI.Name)
 		for _, cmd := range ctx.Stack {
 			b.WriteRune(' ')
 			b.WriteString(cmd.Name[0])
 		}
 		return b.String()
 	}
-	return ctx.CLI.Name
+	return ctx.UI.Name
 }
 
 func (ctx *Context) Command() (cmd *Command, err error) {
@@ -115,12 +115,12 @@ func (ctx *Context) Value(name string) interface{} {
 }
 
 func (ctx *Context) Prepare(cmd *Command) error {
-	if ctx.CLI.Prepare != nil {
-		return ctx.CLI.Prepare(ctx, cmd)
+	if ctx.UI.Prepare != nil {
+		return ctx.UI.Prepare(ctx, cmd)
 	}
 	return nil
 }
 
 func (ctx *Context) ErrorHandler(err error) error {
-	return ctx.CLI.ErrorHandler(ctx, err)
+	return ctx.UI.ErrorHandler(ctx, err)
 }

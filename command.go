@@ -46,7 +46,7 @@ type Command struct {
 func (c *Command) Run(ctx *Context) error {
 	if c.Flags != nil {
 		ctx.Flags = NewFlagSet()
-		ctx.CLI.Flags.VisitAll(ctx.Flags.Add)
+		ctx.UI.Flags.VisitAll(ctx.Flags.Add)
 		for _, cmd := range ctx.Stack {
 			if cmd.Flags == nil {
 				panic(ErrFlags)
@@ -58,14 +58,14 @@ func (c *Command) Run(ctx *Context) error {
 		}
 		ctx.Args = ctx.Flags.Args()
 		switch {
-		case ctx.CLI.help && ctx.Bool("help"):
+		case ctx.UI.help && ctx.Bool("help"):
 			return Help(ctx)
-		case ctx.CLI.version && ctx.Bool("version"):
+		case ctx.UI.version && ctx.Bool("version"):
 			return Version(ctx)
 		}
 	}
 	if c.Action == nil {
-		return ctx.CLI.Action(ctx)
+		return ctx.UI.Action(ctx)
 	}
 	return c.Action(ctx)
 }

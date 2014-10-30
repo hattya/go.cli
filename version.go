@@ -40,10 +40,10 @@ func NewVersionCommand() *Command {
 var Version = ShowVersion
 
 func ShowVersion(ctx *Context) error {
-	version := ctx.CLI.Version
+	version := ctx.UI.Version
 	if version == "" {
 		version = "unknown"
 	}
-	ctx.CLI.Printf("%v version %v\n", ctx.CLI.Name, version)
+	ctx.UI.Printf("%v version %v\n", ctx.UI.Name, version)
 	return nil
 }
