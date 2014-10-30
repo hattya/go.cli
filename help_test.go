@@ -35,14 +35,12 @@ import (
 	"github.com/hattya/go.cli"
 )
 
-type helpCommandTest struct {
+var helpCommandTests = []struct {
 	args []string
 	cmds []*cli.Command
 	err  bool
 	out  string
-}
-
-var helpCommandTests = []helpCommandTest{
+}{
 	{
 		args: []string{"help"},
 		out:  "usage: %v",
@@ -80,19 +78,19 @@ func TestHelpCommand(t *testing.T) {
 	for _, tt := range helpCommandTests {
 		for _, action := range []cli.Action{cli.Subcommand, cli.Chain} {
 			var b bytes.Buffer
-			c := cli.NewCLI()
-			c.Cmds = tt.cmds
-			c.Action = action
-			c.Stdout = &b
-			c.Stderr = &b
-			c.Add(cli.NewHelpCommand())
-			switch err := c.Run(tt.args); {
+			app := cli.NewCLI()
+			app.Cmds = tt.cmds
+			app.Action = action
+			app.Stdout = &b
+			app.Stderr = &b
+			app.Add(cli.NewHelpCommand())
+			switch err := app.Run(tt.args); {
 			case !tt.err && err != nil:
 				t.Fatal(err)
 			case tt.err && err == nil:
 				t.Fatal("expected error")
 			}
-			if err := testOut(strings.SplitN(b.String(), "\n", 2)[0], fmt.Sprintf(tt.out, c.Name)); err != nil {
+			if err := testOut(strings.SplitN(b.String(), "\n", 2)[0], fmt.Sprintf(tt.out, app.Name)); err != nil {
 				t.Error(err)
 			}
 		}
@@ -104,15 +102,13 @@ var options = `options:
   -h, --help    show help
   --version     show version information`
 
-type helpTest struct {
+var helpTests = []struct {
 	usage  interface{}
 	desc   string
 	epilog string
 	cmds   []*cli.Command
 	out    string
-}
-
-var helpTests = []helpTest{
+}{
 	{
 		out: `usage: %[1]v
 
@@ -228,31 +224,29 @@ func TestHelp(t *testing.T) {
 	args := []string{"--help"}
 	for _, tt := range helpTests {
 		b.Reset()
-		c := cli.NewCLI()
-		c.Usage = tt.usage
-		c.Desc = tt.desc
-		c.Epilog = tt.epilog
-		c.Cmds = tt.cmds
-		c.Stdout = &b
-		if err := c.Run(args); err != nil {
+		app := cli.NewCLI()
+		app.Usage = tt.usage
+		app.Desc = tt.desc
+		app.Epilog = tt.epilog
+		app.Cmds = tt.cmds
+		app.Stdout = &b
+		if err := app.Run(args); err != nil {
 			t.Fatal(err)
 		}
-		if err := testOut(b.String(), fmt.Sprintf(tt.out, c.Name, options)); err != nil {
+		if err := testOut(b.String(), fmt.Sprintf(tt.out, app.Name, options)); err != nil {
 			t.Error(err)
 		}
 	}
 }
 
-type commandHelpTest struct {
+var commandHelpTests = []struct {
 	alias  []string
 	usage  interface{}
 	desc   string
 	epilog string
 	cmds   []*cli.Command
 	out    string
-}
-
-var commandHelpTests = []commandHelpTest{
+}{
 	{
 		out: `usage: %[1]v %[2]v
 `,
@@ -315,9 +309,9 @@ func TestCommandHelp(t *testing.T) {
 	args := []string{name[0], "--help"}
 	for _, tt := range commandHelpTests {
 		b.Reset()
-		c := cli.NewCLI()
-		c.Stdout = b
-		c.Add(&cli.Command{
+		app := cli.NewCLI()
+		app.Stdout = b
+		app.Add(&cli.Command{
 			Name:   append(append([]string{}, name...), tt.alias...),
 			Usage:  tt.usage,
 			Desc:   tt.desc,
@@ -325,21 +319,19 @@ func TestCommandHelp(t *testing.T) {
 			Cmds:   tt.cmds,
 			Flags:  cli.NewFlagSet(),
 		})
-		if err := c.Run(args); err != nil {
+		if err := app.Run(args); err != nil {
 			t.Fatal(err)
 		}
-		if err := testOut(b.String(), fmt.Sprintf(tt.out, c.Name, name[0])); err != nil {
+		if err := testOut(b.String(), fmt.Sprintf(tt.out, app.Name, name[0])); err != nil {
 			t.Error(err)
 		}
 	}
 }
 
-type usageTest struct {
+var usageTests = []struct {
 	usage  interface{}
 	format string
-}
-
-var usageTests = []usageTest{
+}{
 	{
 		usage:  nil,
 		format: "usage: %s",
@@ -356,9 +348,9 @@ var usageTests = []usageTest{
 
 func TestUsage(t *testing.T) {
 	for _, tt := range usageTests {
-		c := cli.NewCLI()
-		c.Usage = tt.usage
-		if err := testOut(strings.Join(cli.Usage(cli.NewContext(c)), "\n"), fmt.Sprintf(tt.format, c.Name)); err != nil {
+		app := cli.NewCLI()
+		app.Usage = tt.usage
+		if err := testOut(strings.Join(cli.Usage(cli.NewContext(app)), "\n"), fmt.Sprintf(tt.format, app.Name)); err != nil {
 			t.Error(err)
 		}
 	}
@@ -371,19 +363,17 @@ func TestUsagePanic(t *testing.T) {
 		}
 	}()
 
-	c := cli.NewCLI()
-	c.Usage = 1
-	cli.Usage(cli.NewContext(c))
+	app := cli.NewCLI()
+	app.Usage = 1
+	cli.Usage(cli.NewContext(app))
 }
 
-type metaVarTest struct {
+var metaVarTests = []struct {
 	name     string
 	value    interface{}
 	metaVar  string
 	expected string
-}
-
-var metaVarTests = []metaVarTest{
+}{
 	{
 		name:     "b,bool",
 		value:    false,

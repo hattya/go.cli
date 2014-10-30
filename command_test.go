@@ -35,20 +35,21 @@ import (
 )
 
 func TestCommand(t *testing.T) {
-	newCLI := func() (*cli.CLI, *cli.Command) {
-		c := cli.NewCLI()
-		c.Stdout = ioutil.Discard
-		c.Stderr = ioutil.Discard
-		c.Add(&cli.Command{
+	setup := func() (*cli.CLI, *cli.Command) {
+		app := cli.NewCLI()
+		app.Stdout = ioutil.Discard
+		app.Stderr = ioutil.Discard
+		cmd := &cli.Command{
 			Name:  []string{"cmd"},
 			Flags: cli.NewFlagSet(),
-		})
-		return c, c.Cmds[0]
+		}
+		app.Add(cmd)
+		return app, cmd
 	}
 
-	c, _ := newCLI()
+	app, _ := setup()
 	args := []string{"_"}
-	if err := c.Run(args); err == nil {
+	if err := app.Run(args); err == nil {
 		t.Error("expected error")
 	} else {
 		if _, ok := err.(*cli.CommandError); !ok {
@@ -59,18 +60,18 @@ func TestCommand(t *testing.T) {
 		}
 	}
 
-	c, _ = newCLI()
+	app, _ = setup()
 	args = []string{}
-	switch err := c.Run(args); {
+	switch err := app.Run(args); {
 	case err == nil:
 		t.Error("expected error")
 	case err != cli.ErrCommand:
 		t.Error("unexpected error:", err)
 	}
 
-	c, cmd := newCLI()
-	args = []string{cmd.Name[0], "-cli"}
-	if err := c.Run(args); err == nil {
+	app, cmd := setup()
+	args = []string{cmd.Name[0], "-g"}
+	if err := app.Run(args); err == nil {
 		t.Error("expected error")
 	} else {
 		if _, ok := err.(cli.FlagError); !ok {
@@ -81,34 +82,34 @@ func TestCommand(t *testing.T) {
 		}
 	}
 
-	c, cmd = newCLI()
+	app, cmd = setup()
 	args = []string{cmd.Name[0]}
-	if err := c.Run(args); err != nil {
+	if err := app.Run(args); err != nil {
 		t.Error("unexpected error:", err)
 	}
 
-	c, cmd = newCLI()
+	app, cmd = setup()
 	cmd.Action = func(*cli.Context) error {
 		return nil
 	}
 	args = []string{cmd.Name[0]}
-	if err := c.Run(args); err != nil {
+	if err := app.Run(args); err != nil {
 		t.Error("unexpected error:", err)
 	}
 
-	c, cmd = newCLI()
-	c.Flags.Bool("cli", false, "")
+	app, cmd = setup()
+	app.Flags.Bool("g", false, "")
 	cmd.Flags.Bool("cmd", false, "")
 	cmd.Action = func(ctx *cli.Context) error {
-		for _, n := range []string{"cli", "cmd"} {
+		for _, n := range []string{"g", "cmd"} {
 			if g, e := ctx.Bool(n), true; g != e {
 				t.Errorf("expected %v, got %v", e, g)
 			}
 		}
 		return nil
 	}
-	args = []string{"-cli", cmd.Name[0], "-cmd"}
-	if err := c.Run(args); err != nil {
+	args = []string{"-g", cmd.Name[0], "-cmd"}
+	if err := app.Run(args); err != nil {
 		t.Error("unexpected error:", err)
 	}
 }

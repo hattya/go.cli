@@ -37,22 +37,26 @@ import (
 var versionOut = `%v version %v
 `
 
+var versionTests = []struct {
+	in, out string
+}{
+	{"", "unknown"},
+	{"1.0", "1.0"},
+}
+
 func TestVersionCommand(t *testing.T) {
 	var b bytes.Buffer
 	args := []string{"version"}
-	for _, v := range [][]string{
-		{"", "unknown"},
-		{"1.0", "1.0"},
-	} {
+	for _, tt := range versionTests {
 		b.Reset()
-		c := cli.NewCLI()
-		c.Version = v[0]
-		c.Stdout = &b
-		c.Add(cli.NewVersionCommand())
-		if err := c.Run(args); err != nil {
+		app := cli.NewCLI()
+		app.Version = tt.in
+		app.Stdout = &b
+		app.Add(cli.NewVersionCommand())
+		if err := app.Run(args); err != nil {
 			t.Fatal(err)
 		}
-		if err := testOut(b.String(), fmt.Sprintf(versionOut, c.Name, v[1])); err != nil {
+		if err := testOut(b.String(), fmt.Sprintf(versionOut, app.Name, tt.out)); err != nil {
 			t.Error(err)
 		}
 	}
@@ -61,35 +65,32 @@ func TestVersionCommand(t *testing.T) {
 func TestVersion(t *testing.T) {
 	var b bytes.Buffer
 	args := []string{"--version"}
-	for _, v := range [][]string{
-		{"", "unknown"},
-		{"1.0", "1.0"},
-	} {
+	for _, tt := range versionTests {
 		b.Reset()
-		c := cli.NewCLI()
-		c.Version = v[0]
-		c.Stdout = &b
-		if err := c.Run(args); err != nil {
+		app := cli.NewCLI()
+		app.Version = tt.in
+		app.Stdout = &b
+		if err := app.Run(args); err != nil {
 			t.Fatal(err)
 		}
-		if err := testOut(b.String(), fmt.Sprintf(versionOut, c.Name, v[1])); err != nil {
+		if err := testOut(b.String(), fmt.Sprintf(versionOut, app.Name, tt.out)); err != nil {
 			t.Error(err)
 		}
 	}
 
 	b.Reset()
-	c := cli.NewCLI()
-	c.Version = "1.0"
-	c.Stdout = &b
-	c.Add(&cli.Command{
+	app := cli.NewCLI()
+	app.Version = "1.0"
+	app.Stdout = &b
+	app.Add(&cli.Command{
 		Name:  []string{"cmd"},
 		Flags: cli.NewFlagSet(),
 	})
 	args = []string{"cmd", "--version"}
-	if err := c.Run(args); err != nil {
+	if err := app.Run(args); err != nil {
 		t.Fatal(err)
 	}
-	if err := testOut(b.String(), fmt.Sprintf(versionOut, c.Name, c.Version)); err != nil {
+	if err := testOut(b.String(), fmt.Sprintf(versionOut, app.Name, app.Version)); err != nil {
 		t.Error(err)
 	}
 }

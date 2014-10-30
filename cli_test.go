@@ -40,11 +40,11 @@ import (
 )
 
 func TestCLI(t *testing.T) {
-	c := cli.NewCLI()
-	c.Stdout = ioutil.Discard
-	c.Stderr = ioutil.Discard
-	args := []string{"-cli"}
-	if err := c.Run(args); err == nil {
+	app := cli.NewCLI()
+	app.Stdout = ioutil.Discard
+	app.Stderr = ioutil.Discard
+	args := []string{"-g"}
+	if err := app.Run(args); err == nil {
 		t.Error("expected error")
 	} else {
 		if _, ok := err.(cli.FlagError); !ok {
@@ -55,21 +55,21 @@ func TestCLI(t *testing.T) {
 		}
 	}
 
-	c = cli.NewCLI()
-	c.Flags.Bool("bool", false, "")
-	c.Flags.Duration("duration", 0, "")
-	c.Flags.Float64("float64", 0.0, "")
-	c.Flags.Int("int", 0, "")
-	c.Flags.Int64("int64", 0, "")
-	c.Flags.String("string", "", "")
-	c.Flags.Uint("uint", 0, "")
-	c.Flags.Uint64("uint64", 0, "")
-	c.Flags.Var("var", &value{}, "")
+	app = cli.NewCLI()
+	app.Flags.Bool("bool", false, "")
+	app.Flags.Duration("duration", 0, "")
+	app.Flags.Float64("float64", 0.0, "")
+	app.Flags.Int("int", 0, "")
+	app.Flags.Int64("int64", 0, "")
+	app.Flags.String("string", "", "")
+	app.Flags.Uint("uint", 0, "")
+	app.Flags.Uint64("uint64", 0, "")
+	app.Flags.Var("var", &value{}, "")
 	args = strings.Fields("-bool -duration 1ms -float64 3.14 -int -1 -int64 -64 -string string -uint 1 -uint64 64 -var var 0 1")
-	if err := c.Run(args); err != nil {
+	if err := app.Run(args); err != nil {
 		t.Fatal(err)
 	}
-	ctx := cli.NewContext(c)
+	ctx := cli.NewContext(app)
 	for i := 0; i < len(ctx.Args); i++ {
 		if g, e := ctx.Args[i], strconv.FormatInt(int64(i), 10); g != e {
 			t.Errorf("expected %v, got %v", e, g)
@@ -107,16 +107,16 @@ func TestCLI(t *testing.T) {
 
 func TestCLIOut(t *testing.T) {
 	var stdout, stderr bytes.Buffer
-	c := cli.NewCLI()
-	c.Stdout = &stdout
-	c.Stderr = &stderr
+	app := cli.NewCLI()
+	app.Stdout = &stdout
+	app.Stderr = &stderr
 
-	c.Print("Print,")
-	c.Println("Println")
-	c.Printf("Printf")
-	c.Error("Error,")
-	c.Errorln("Errorln")
-	c.Errorf("Errorf")
+	app.Print("Print,")
+	app.Println("Println")
+	app.Printf("Printf")
+	app.Error("Error,")
+	app.Errorln("Errorln")
+	app.Errorf("Errorf")
 
 	if err := testOut(stdout.String(), "Print,Println\nPrintf"); err != nil {
 		t.Error(err)
@@ -127,33 +127,31 @@ func TestCLIOut(t *testing.T) {
 }
 
 func TestPrepare(t *testing.T) {
-	c := cli.NewCLI()
-	c.Stdout = ioutil.Discard
-	c.Stderr = ioutil.Discard
-	c.Prepare = func(ctx *cli.Context, cmd *cli.Command) error {
+	app := cli.NewCLI()
+	app.Stdout = ioutil.Discard
+	app.Stderr = ioutil.Discard
+	app.Prepare = func(ctx *cli.Context, cmd *cli.Command) error {
 		cmd.Data = cmd.Data.(int) + 1
 		return nil
 	}
-	c.Add(&cli.Command{
+	app.Add(&cli.Command{
 		Name: []string{"true"},
 		Data: 0,
 	})
 
 	args := []string{"true"}
-	if err := c.Run(args); err != nil {
+	if err := app.Run(args); err != nil {
 		t.Fatal(err)
 	}
-	if g, e := c.Cmds[0].Data, 1; g != e {
+	if g, e := app.Cmds[0].Data, 1; g != e {
 		t.Errorf("expected %v, got %v", e, g)
 	}
 }
 
-type errorHandlerTest struct {
+var errorHandlerTests = []struct {
 	err error
 	out string
-}
-
-var errorHandlerTests = []errorHandlerTest{
+}{
 	{
 		err: nil,
 		out: "",
@@ -211,10 +209,10 @@ usage: %[1]v
 
 func TestErrorHandler(t *testing.T) {
 	var b bytes.Buffer
-	c := cli.NewCLI()
-	c.Stdout = &b
-	c.Stderr = &b
-	ctx := cli.NewContext(c)
+	app := cli.NewCLI()
+	app.Stdout = &b
+	app.Stderr = &b
+	ctx := cli.NewContext(app)
 	for _, tt := range errorHandlerTests {
 		b.Reset()
 		cli.ErrorHandler(ctx, tt.err)
