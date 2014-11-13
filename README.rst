@@ -3,6 +3,9 @@ go.cli
 
 A command line interface framework
 
+.. image:: https://drone.io/github.com/hattya/go.cli/status.png
+   :target: https://drone.io/github.com/hattya/go.cli/latest
+
 
 Install
 -------
