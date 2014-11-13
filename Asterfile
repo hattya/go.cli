@@ -2,10 +2,10 @@ var proj = os.getwd().split(/[/\\]+/).slice(-1);
 
 // go
 aster.watch(/.+\.go$/, function(files) {
-  if (go('vet')) {
+  if (go('get', '-t', '-v')) {
     return;
   }
-  if (go('get', '-t', '-v', './...')) {
+  if (go('vet')) {
     return;
   }
   if (go('test', '-v', '-covermode', 'count', '-coverprofile', 'cover.out')) {
