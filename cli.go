@@ -34,6 +34,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 type CLI struct {
@@ -135,6 +137,13 @@ func (ui *CLI) Errorln(a ...interface{}) (int, error) {
 
 func (ui *CLI) Errorf(format string, a ...interface{}) (int, error) {
 	return fmt.Fprintf(ui.Stderr, format, a...)
+}
+
+func (ui *CLI) Title(title string) error {
+	if f, ok := ui.Stdout.(*os.File); ok && terminal.IsTerminal(int(f.Fd())) {
+		return ui.title(title)
+	}
+	return nil
 }
 
 var (

@@ -30,6 +30,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -122,6 +123,19 @@ func TestCLIOut(t *testing.T) {
 		t.Error(err)
 	}
 	if err := testOut(stderr.String(), "Error,Errorln\nErrorf"); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCLITitle(t *testing.T) {
+	app := cli.NewCLI()
+
+	if err := app.Title(app.Name); err != nil {
+		t.Error(err)
+	}
+
+	app.Stdout = os.Stdout
+	if err := app.Title(app.Name); err != nil {
 		t.Error(err)
 	}
 }
