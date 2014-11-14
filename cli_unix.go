@@ -41,6 +41,7 @@ func init() {
 	b.WriteString(`^(?:`)
 	for i, s := range []string{
 		"xterm",
+		"putty",
 		"rxvt",
 		"screen",
 	} {
