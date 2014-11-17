@@ -27,6 +27,7 @@
 package cli
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -144,6 +145,35 @@ func (ui *CLI) Title(title string) error {
 		return ui.title(title)
 	}
 	return nil
+}
+
+func (ui *CLI) Prompt(prompt string) (string, error) {
+	ui.Print(prompt)
+	b := make([]byte, 1024)
+	var in []byte
+	for {
+		n, err := ui.Stdin.Read(b)
+		if err != nil {
+			return "", err
+		}
+		if n == 0 {
+			if len(in) == 0 {
+				return "", io.EOF
+			}
+			break
+		}
+		if i := bytes.IndexByte(b[:n], '\n'); i != -1 {
+			n = i
+		}
+		in = append(in, b[:n]...)
+		if n < len(b) {
+			if 0 < len(in) && in[len(in)-1] == '\r' {
+				in = in[:len(in)-1]
+			}
+			break
+		}
+	}
+	return string(in), nil
 }
 
 var (

@@ -29,6 +29,7 @@ package cli_test
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -137,6 +138,57 @@ func TestCLITitle(t *testing.T) {
 	app.Stdout = os.Stdout
 	if err := app.Title(app.Name); err != nil {
 		t.Error(err)
+	}
+}
+
+var promptTests = []struct {
+	in, out string
+	err     error
+}{
+	{
+		in:  "input",
+		out: "input",
+	},
+	{
+		in:  "input\n",
+		out: "input",
+	},
+	{
+		in:  "input\r\n",
+		out: "input",
+	},
+	{
+		err: io.EOF,
+	},
+}
+
+func TestPrompt(t *testing.T) {
+	var stdin, stdout bytes.Buffer
+	app := cli.NewCLI()
+	app.Stdin = &stdin
+	app.Stdout = &stdout
+	prompt := ">> "
+
+	for _, tt := range promptTests {
+		stdin.Reset()
+		stdout.Reset()
+		stdin.WriteString(tt.in)
+		l, err := app.Prompt(prompt)
+		if tt.err == nil {
+			if err != nil {
+				t.Fatal(err)
+			}
+		} else {
+			if g, e := err, tt.err; g != e {
+				t.Errorf("expected %v, got %v", e, g)
+			}
+		}
+		if g, e := l, tt.out; g != e {
+			t.Errorf("expected %q, got %q", e, g)
+		}
+		if g, e := stdout.String(), prompt; g != e {
+			t.Errorf("expected %q, got %q", e, g)
+		}
 	}
 }
 
