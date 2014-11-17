@@ -304,13 +304,13 @@ commands:
 }
 
 func TestCommandHelp(t *testing.T) {
-	b := new(bytes.Buffer)
+	var b bytes.Buffer
 	name := []string{"cmd"}
 	args := []string{name[0], "--help"}
 	for _, tt := range commandHelpTests {
 		b.Reset()
 		app := cli.NewCLI()
-		app.Stdout = b
+		app.Stdout = &b
 		app.Add(&cli.Command{
 			Name:   append(append([]string{}, name...), tt.alias...),
 			Usage:  tt.usage,

@@ -128,7 +128,7 @@ func TestCLIOut(t *testing.T) {
 	}
 }
 
-func TestCLITitle(t *testing.T) {
+func TestTitle(t *testing.T) {
 	app := cli.NewCLI()
 
 	if err := app.Title(app.Name); err != nil {
