@@ -192,6 +192,26 @@ func TestPrompt(t *testing.T) {
 	}
 }
 
+func TestPassword(t *testing.T) {
+	var stdin, stdout bytes.Buffer
+	app := cli.NewCLI()
+	app.Stdin = &stdin
+	app.Stdout = &stdout
+	prompt := "Password: "
+
+	stdin.WriteString("password")
+	l, err := app.Password(prompt)
+	if err != nil {
+		t.Error(err)
+	}
+	if g, e := l, "password"; g != e {
+		t.Errorf("expected %q, got %q", e, g)
+	}
+	if g, e := stdout.String(), prompt+"\n"; g != e {
+		t.Errorf("expected %q, got %q", e, g)
+	}
+}
+
 func TestPrepare(t *testing.T) {
 	app := cli.NewCLI()
 	app.Stdout = ioutil.Discard

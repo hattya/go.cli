@@ -149,6 +149,20 @@ func (ui *CLI) Title(title string) error {
 
 func (ui *CLI) Prompt(prompt string) (string, error) {
 	ui.Print(prompt)
+	return ui.readLine()
+}
+
+func (ui *CLI) Password(prompt string) (string, error) {
+	ui.Print(prompt)
+	defer ui.Println()
+	if f, ok := ui.Stdin.(*os.File); ok && terminal.IsTerminal(int(f.Fd())) {
+		b, err := terminal.ReadPassword(int(f.Fd()))
+		return string(b), err
+	}
+	return ui.readLine()
+}
+
+func (ui *CLI) readLine() (string, error) {
 	b := make([]byte, 1024)
 	var in []byte
 	for {
