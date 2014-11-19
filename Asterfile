@@ -1,4 +1,7 @@
 var proj = os.getwd().split(/[/\\]+/).slice(-1);
+var title = 'Aster ☆ ' + proj;
+
+aster.title(title);
 
 // go
 aster.watch(/.+\.go$/, function(files) {
@@ -13,6 +16,7 @@ aster.watch(/.+\.go$/, function(files) {
   }
   cover('-func', 'cover.out');
   cover('-html', 'cover.out', '-o', 'coverage.html');
+  aster.title(title);
 });
 
 function go() {
