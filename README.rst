@@ -6,9 +6,12 @@ A command line interface framework
 .. image:: https://drone.io/github.com/hattya/go.cli/status.png
    :target: https://drone.io/github.com/hattya/go.cli/latest
 
+.. image:: https://ci.appveyor.com/api/projects/status/fwccrp8kt0g2mhik?svg=true
+   :target: https://ci.appveyor.com/project/hattya/go-cli
 
-Install
--------
+
+Installation
+------------
 
 .. code:: console
 
