@@ -1,7 +1,7 @@
 //
 // go.cli :: flag_test.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -152,6 +152,53 @@ func TestAddFlags(t *testing.T) {
 		i++
 	})
 	if g, e := i, 1; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+}
+
+func TestResetFlags(t *testing.T) {
+	envVar := func(s string) string {
+		return fmt.Sprintf("__CLI_%v__", strings.ToUpper(s))
+	}
+
+	os.Setenv(envVar("int"), "-2")
+	defer os.Setenv(envVar("int"), "")
+
+	flags := cli.NewFlagSet()
+	flags.Bool("h, help", false, "")
+	flags.IntEnv(envVar("int"), "int", 0, "")
+	flags.UintEnv(envVar("uint"), "uint", 0, "")
+
+	flags.Set("h", "true")
+	flags.Reset()
+	if g, e := flags.Parsed(), false; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+	if g, e := flags.Get("h"), false; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+	if g, e := flags.Get("int"), -2; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+	if g, e := flags.Get("uint"), uint(0); g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+
+	args := []string{"-h", "-int", "-1", "-uint", "1"}
+	if err := flags.Parse(args); err != nil {
+		t.Fatal(err)
+	}
+	flags.Reset()
+	if g, e := flags.Parsed(), false; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+	if g, e := flags.Get("h"), false; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+	if g, e := flags.Get("int"), -2; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+	if g, e := flags.Get("uint"), uint(0); g != e {
 		t.Errorf("expected %v, got %v", e, g)
 	}
 }

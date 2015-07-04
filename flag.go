@@ -1,7 +1,7 @@
 //
 // go.cli :: flag.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -117,6 +117,26 @@ func (fs *FlagSet) error(err error) error {
 		return FlagError(err.Error())
 	}
 	return nil
+}
+
+func (fs *FlagSet) Reset() {
+	parsed := fs.fs.Parsed()
+	if parsed {
+		fs.fs = flag.FlagSet{}
+	}
+	for _, f := range fs.list {
+		if parsed {
+			for _, n := range f.Name {
+				fs.fs.Var(f.Value, n, f.Usage)
+			}
+		}
+		f.Value.Set(f.Default)
+		if f.EnvVar != "" {
+			if s := os.Getenv(f.EnvVar); s != "" {
+				f.Value.Set(s)
+			}
+		}
+	}
 }
 
 func (fs *FlagSet) Visit(fn func(*Flag)) {
