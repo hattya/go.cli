@@ -4,7 +4,7 @@ var title = 'Aster ☆ ' + proj;
 aster.title(title);
 
 // go
-aster.watch(/.+\.go$/, function(files) {
+aster.watch(/.+\.go$/, function() {
   if (go('get', '-t', '-v')) {
     return;
   }
@@ -21,12 +21,12 @@ aster.watch(/.+\.go$/, function(files) {
 
 function go() {
   var args = ['go'].concat(Array.prototype.slice.call(arguments));
-  var cmd = args[1] == 'get' ? 'bulid' : args[1];
+  var cmd = args[1] === 'get' ? 'bulid' : args[1];
   var rv = system(args);
-  if (rv) {
-    aster.notify('failure', proj + ': ' + cmd, cmd + ' failed');
-  } else {
+  if (!rv) {
     aster.notify('success', proj + ': ' + cmd, cmd + ' passed');
+  } else {
+    aster.notify('failure', proj + ': ' + cmd, cmd + ' failed');
   }
   return rv;
 }
@@ -37,14 +37,25 @@ function cover() {
 
 // rst
 aster.watch(/.+\.rst$/, function(files) {
-  if (os.whence('rst2html.py') !== undefined) {
-    files.forEach(rst2html);
-    aster.notify('success', proj + ': rst2html.py', files.join('\n'));
-  }
+  files.forEach(rst2html);
 });
 
 function rst2html(rst) {
-  return system(['rst2html.py', rst, rst.slice(0, -4) + '.html']);
+  var rst2html;
+  var ok = ['rst2html.py', 'rst2html'].some(function(s) {
+    rst2html = s;
+    return os.whence(rst2html);
+  });
+  if (!ok) {
+    return true;
+  }
+  var rv = system([rst2html, '--strict', rst, rst.slice(0, -4) + '.html']);
+  if (!rv) {
+    aster.notify('success', proj + ': rst2html', rst);
+  } else {
+    aster.notify('failure', proj + ': rst2html', rst + ' failed');
+  }
+  return rv;
 }
 
 // system
