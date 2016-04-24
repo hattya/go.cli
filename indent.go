@@ -27,8 +27,6 @@
 package cli
 
 import (
-	"bufio"
-	"io"
 	"strings"
 	"unicode/utf8"
 )
@@ -40,72 +38,57 @@ func Dedent(s string) string {
 			break
 		}
 	}
-	r := bufio.NewReader(strings.NewReader(s))
 
-	isNewline := func(s string) bool {
-		return s == "\n" || s == "\r\n"
+	isEmpty := func(s string) bool {
+		return s == "" || s == "\r"
 	}
 
-	var out []string
+	out := strings.Split(s, "\n")
 	var mgn string
-	var eof bool
 	n := 0
-	for !eof {
-		l, err := r.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				if l == "" {
-					break
-				}
-				eof = true
-			} else {
-				panic(err)
-			}
-		}
-
-		i := strings.IndexFunc(l, func(r rune) bool {
+	for i, l := range out {
+		j := strings.IndexFunc(l, func(r rune) bool {
 			return r != '\t' && r != ' '
 		})
 		switch {
-		case i == -1:
+		case j == -1:
+			out[i] = ""
 			continue
-		case isNewline(l[i:]):
-			out = append(out, l[i:])
+		case isEmpty(l[j:]):
+			out[i] = l[j:]
 			continue
-		default:
-			out = append(out, l)
-			n++
 		}
 
-		ind := l[:i]
+		ind := l[:j]
 		switch {
-		case n == 1:
+		case n == 0:
 			mgn = ind
 		case !strings.HasPrefix(ind, mgn):
-			i := 0
+			j := 0
 			for {
-				r, w := utf8.DecodeRuneInString(ind[i:])
+				r, w := utf8.DecodeRuneInString(ind[j:])
 				if r == utf8.RuneError {
 					if w == 1 {
 						panic("invalid UTF-8")
 					}
 					break
 				}
-				if !strings.HasPrefix(mgn, ind[:i+w]) {
+				if !strings.HasPrefix(mgn, ind[:j+w]) {
 					break
 				}
-				i += w
+				j += w
 			}
-			mgn = mgn[:i]
+			mgn = mgn[:j]
 		}
+		n++
 	}
 
 	if mgn != "" {
-		for i := range out {
-			if !isNewline(out[i]) {
-				out[i] = out[i][len(mgn):]
+		for i, l := range out {
+			if !isEmpty(l) {
+				out[i] = l[len(mgn):]
 			}
 		}
 	}
-	return strings.Join(out, "")
+	return strings.Join(out, "\n")
 }
