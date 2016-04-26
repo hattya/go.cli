@@ -1,7 +1,7 @@
 //
 // go.cli :: flag.go
 //
-//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -29,6 +29,7 @@ package cli
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"sort"
@@ -68,7 +69,11 @@ func (f *Flag) Format(sep string) string {
 	b.WriteString(MetaVar(f))
 	if f.Usage != "" {
 		b.WriteString(sep)
-		b.WriteString(f.Usage)
+		if strings.ContainsRune(f.Usage, '%') {
+			fmt.Fprintf(&b, f.Usage, f.Default)
+		} else {
+			b.WriteString(f.Usage)
+		}
 	}
 	return b.String()
 }

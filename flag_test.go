@@ -1,7 +1,7 @@
 //
 // go.cli :: flag_test.go
 //
-//   Copyright (c) 2014-2015 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -154,6 +154,53 @@ func TestAddFlags(t *testing.T) {
 	if g, e := i, 1; g != e {
 		t.Errorf("expected %v, got %v", e, g)
 	}
+}
+
+func TestFormatFlags(t *testing.T) {
+	values := map[string]string{
+		"bool":     "true",
+		"duration": (1 * time.Millisecond).String(),
+		"float64":  "3.14",
+		"int":      "-1",
+		"string":   "string",
+		"uint":     "1",
+	}
+	usage := "usage"
+
+	flags := cli.NewFlagSet()
+	flags.Bool("bool", false, usage)
+	flags.Duration("duration", 0, usage)
+	flags.Float64("float64", 0.0, usage)
+	flags.Int("int", 0, usage)
+	flags.String("string", "", usage)
+	flags.Uint("uint", 0, usage)
+
+	flags.VisitAll(func(f *cli.Flag) {
+		s := "--%v"
+		if f.Name[0] != "bool" {
+			s += " <%[1]v>"
+		}
+		s += "\t%v"
+		if g, e := f.Format("\t"), fmt.Sprintf(s, f.Name[0], usage); g != e {
+			t.Errorf("expected %q, got %q", e, g)
+		}
+	})
+
+	for k, v := range values {
+		f := flags.Lookup(k)
+		f.Usage += " (default: %v)"
+		f.Default = v
+	}
+	flags.VisitAll(func(f *cli.Flag) {
+		s := "--%v"
+		if f.Name[0] != "bool" {
+			s += " <%[1]v>"
+		}
+		s += "\t%v (default: %v)"
+		if g, e := f.Format("\t"), fmt.Sprintf(s, f.Name[0], usage, f.Default); g != e {
+			t.Errorf("expected %q, got %q", e, g)
+		}
+	})
 }
 
 func TestResetFlags(t *testing.T) {
