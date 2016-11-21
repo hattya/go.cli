@@ -1,7 +1,7 @@
 //
 // go.cli :: action.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -73,6 +73,16 @@ func Option(action Action) Action {
 		if 0 < len(ctx.Args) {
 			return DefaultAction(ctx)
 		}
+		err := ctx.Prepare(nil)
+		if err == nil {
+			err = action(ctx)
+		}
+		return ctx.ErrorHandler(err)
+	}
+}
+
+func Simple(action Action) Action {
+	return func(ctx *Context) error {
 		err := ctx.Prepare(nil)
 		if err == nil {
 			err = action(ctx)

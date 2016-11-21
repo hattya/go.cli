@@ -1,7 +1,7 @@
 //
 // go.cli :: action_test.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -244,6 +244,20 @@ func TestOption(t *testing.T) {
 
 	app, cmd := setup()
 	args = []string{cmd.Name[0]}
+	if err := app.Run(args); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestSimple(t *testing.T) {
+	app := cli.NewCLI()
+	app.Action = cli.Simple(func(*cli.Context) error {
+		return nil
+	})
+	app.Stdout = ioutil.Discard
+	app.Stderr = ioutil.Discard
+
+	args := []string{}
 	if err := app.Run(args); err != nil {
 		t.Error(err)
 	}
