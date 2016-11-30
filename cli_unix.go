@@ -1,7 +1,7 @@
 //
 // go.cli :: cli_unix.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -32,6 +32,8 @@ import (
 	"bytes"
 	"os"
 	"regexp"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var xtermRx *regexp.Regexp
@@ -55,8 +57,10 @@ func init() {
 }
 
 func (ui *CLI) title(title string) error {
-	if xtermRx.MatchString(os.Getenv("TERM")) {
-		ui.Printf("\x1b]2;%v\a", title)
+	if f, ok := ui.Stdout.(*os.File); ok && terminal.IsTerminal(int(f.Fd())) {
+		if xtermRx.MatchString(os.Getenv("TERM")) {
+			ui.Printf("\x1b]2;%v\a", title)
+		}
 	}
 	return nil
 }

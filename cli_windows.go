@@ -1,7 +1,7 @@
 //
 // go.cli :: cli_windows.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -40,7 +40,7 @@ func (ui *CLI) title(title string) error {
 }
 
 var (
-	kernel32 = syscall.NewLazyDLL("kernel32")
+	kernel32 = syscall.NewLazyDLL("kernel32.dll")
 
 	pSetConsoleTitle = kernel32.NewProc("SetConsoleTitleW")
 )

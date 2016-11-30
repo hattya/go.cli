@@ -1,7 +1,7 @@
 //
 // go.cli :: cli.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -141,10 +141,7 @@ func (ui *CLI) Errorf(format string, a ...interface{}) (int, error) {
 }
 
 func (ui *CLI) Title(title string) error {
-	if f, ok := ui.Stdout.(*os.File); ok && terminal.IsTerminal(int(f.Fd())) {
-		return ui.title(title)
-	}
-	return nil
+	return ui.title(title)
 }
 
 func (ui *CLI) Prompt(prompt string) (string, error) {
