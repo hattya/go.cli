@@ -297,9 +297,23 @@ func (fs *FlagSet) ChoiceEnv(envVar, name string, value interface{}, choices map
 	return fs.VarEnv(envVar, name, c, usage)
 }
 
+func (fs *FlagSet) PrefixChoice(name string, value interface{}, choices map[string]interface{}, usage string) *Flag {
+	return fs.PrefixChoiceEnv("", name, value, choices, usage)
+}
+
+func (fs *FlagSet) PrefixChoiceEnv(envVar, name string, value interface{}, choices map[string]interface{}, usage string) *Flag {
+	c := &choiceValue{
+		value:   value,
+		choices: choices,
+		prefix:  true,
+	}
+	return fs.VarEnv(envVar, name, c, usage)
+}
+
 type choiceValue struct {
 	value   interface{}
 	choices map[string]interface{}
+	prefix  bool
 }
 
 func (c *choiceValue) Set(s string) (err error) {
@@ -310,6 +324,14 @@ func (c *choiceValue) Set(s string) (err error) {
 			m[k] = v
 		}
 	}
+	// prefix match
+	if c.prefix && s != "" {
+		for k, v := range c.choices {
+			if strings.HasPrefix(k, s) {
+				m[k] = v
+			}
+		}
+	}
 
 	switch len(m) {
 	case 0:
@@ -317,6 +339,12 @@ func (c *choiceValue) Set(s string) (err error) {
 	case 1:
 		for _, v := range m {
 			c.value = v
+		}
+	default:
+		if v, ok := m[s]; ok {
+			c.value = v
+		} else {
+			err = c.error(m)
 		}
 	}
 	return

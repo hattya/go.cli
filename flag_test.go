@@ -325,3 +325,39 @@ func TestChoiceFlag(t *testing.T) {
 		t.Error("unexpected error:", err)
 	}
 }
+
+func TestPrefixChoiceFlag(t *testing.T) {
+	flags := cli.NewFlagSet()
+	flags.PrefixChoice("c, choice", 0, map[string]interface{}{
+		"foo":    1,
+		"bar":    2,
+		"baz":    3,
+		"foobar": 4,
+	}, "")
+
+	args := []string{"-c", "foo"}
+	if err := flags.Parse(args); err != nil {
+		t.Fatal(err)
+	}
+	if g, e := flags.Get("c"), 1; g != e {
+		t.Errorf("expected %v, got %v", e, g)
+	}
+
+	flags.Reset()
+	args = []string{"-c", ""}
+	switch err := flags.Parse(args); {
+	case err == nil:
+		t.Fatal("expected error")
+	case !strings.Contains(err.Error(), `choose from "bar", "baz", "foo" or "foobar"`):
+		t.Error("unexpected error:", err)
+	}
+
+	flags.Reset()
+	args = []string{"-c", "b"}
+	switch err := flags.Parse(args); {
+	case err == nil:
+		t.Fatal("expected error")
+	case !strings.Contains(err.Error(), `choose from "bar" or "baz"`):
+		t.Error("unexpected error:", err)
+	}
+}
