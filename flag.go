@@ -128,6 +128,7 @@ func (fs *FlagSet) Reset() {
 	parsed := fs.fs.Parsed()
 	if parsed {
 		fs.fs = flag.FlagSet{}
+		fs.fs.SetOutput(ioutil.Discard)
 	}
 	for _, f := range fs.list {
 		if parsed {
