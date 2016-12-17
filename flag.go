@@ -285,6 +285,74 @@ func (fs *FlagSet) Uint64Env(envVar, name string, value uint64, usage string) *F
 	})
 }
 
+func (fs *FlagSet) Choice(name string, value interface{}, choices map[string]interface{}, usage string) *Flag {
+	return fs.ChoiceEnv("", name, value, choices, usage)
+}
+
+func (fs *FlagSet) ChoiceEnv(envVar, name string, value interface{}, choices map[string]interface{}, usage string) *Flag {
+	c := &choiceValue{
+		value:   value,
+		choices: choices,
+	}
+	return fs.VarEnv(envVar, name, c, usage)
+}
+
+type choiceValue struct {
+	value   interface{}
+	choices map[string]interface{}
+}
+
+func (c *choiceValue) Set(s string) (err error) {
+	m := make(map[string]interface{})
+	// exact match
+	for k, v := range c.choices {
+		if s == k {
+			m[k] = v
+		}
+	}
+
+	switch len(m) {
+	case 0:
+		err = c.error(c.choices)
+	case 1:
+		for _, v := range m {
+			c.value = v
+		}
+	}
+	return
+}
+
+func (c *choiceValue) error(m map[string]interface{}) error {
+	list := make(sort.StringSlice, len(m))
+	i := 0
+	for k := range m {
+		list[i] = k
+		i++
+	}
+	list.Sort()
+
+	var b bytes.Buffer
+	b.WriteString("choose from ")
+	n := len(list) - 1
+	for i, k := range list {
+		if 0 < i {
+			if i < n {
+				b.WriteString(", ")
+			} else {
+				b.WriteString(" or ")
+			}
+		}
+		b.WriteRune('"')
+		b.WriteString(k)
+		b.WriteRune('"')
+	}
+	return FlagError(b.String())
+}
+
+func (c *choiceValue) Get() interface{} { return c.value }
+
+func (c *choiceValue) String() string { return fmt.Sprintf("%v", c.value) }
+
 func (fs *FlagSet) Var(name string, value flag.Getter, usage string) *Flag {
 	return fs.VarEnv("", name, value, usage)
 }
