@@ -63,7 +63,7 @@ var helpCommandTests = []struct {
 		args: []string{"cmd", "help"},
 		out:  "usage: %v",
 		cmds: []*cli.Command{
-			&cli.Command{
+			{
 				Name: []string{"cmd"},
 				Cmds: []*cli.Command{
 					cli.NewHelpCommand(),
