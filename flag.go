@@ -1,7 +1,7 @@
 //
 // go.cli :: flag.go
 //
-//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -69,13 +69,34 @@ func (f *Flag) Format(sep string) string {
 	b.WriteString(MetaVar(f))
 	if f.Usage != "" {
 		b.WriteString(sep)
-		if strings.ContainsRune(f.Usage, '%') {
-			fmt.Fprintf(&b, f.Usage, f.Default)
+		if n, pct := f.countVerb(f.Usage); 0 < n {
+			if n != pct {
+				fmt.Fprintf(&b, f.Usage, f.Default)
+			} else {
+				fmt.Fprintf(&b, f.Usage)
+			}
 		} else {
 			b.WriteString(f.Usage)
 		}
 	}
 	return b.String()
+}
+
+func (f *Flag) countVerb(s string) (n, pct int) {
+	v := -1
+	for i, r := range s {
+		switch {
+		case v != -1:
+			if v+1 == i && r == '%' {
+				pct++
+			}
+			v = -1
+		case r == '%':
+			n++
+			v = i
+		}
+	}
+	return
 }
 
 type boolFlag interface {
