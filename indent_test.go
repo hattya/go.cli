@@ -1,7 +1,7 @@
 //
 // go.cli :: indent_test.go
 //
-//   Copyright (c) 2016 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2016-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -131,6 +131,10 @@ var dedentTests = []struct {
 	{
 		in:  "\n\n\t 1\n\t\t2\n\t 3\n\t ",
 		out: "\n 1\n\t2\n 3\n",
+	},
+	{
+		in:  "\r\n\r\n\t 1\r\n\t\t2\r\n\t 3\r\n\t ",
+		out: "\r\n 1\r\n\t2\r\n 3\r\n",
 	},
 }
 

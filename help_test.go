@@ -1,7 +1,7 @@
 //
 // go.cli :: help_test.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -97,10 +97,12 @@ func TestHelpCommand(t *testing.T) {
 	}
 }
 
-var options = `options:
+var options = strings.TrimSpace(cli.Dedent(`
+	options:
 
-  -h, --help    show help
-  --version     show version information`
+	  -h, --help    show help
+	  --version     show version information
+`))
 
 var helpTests = []struct {
 	usage  interface{}
@@ -110,62 +112,68 @@ var helpTests = []struct {
 	out    string
 }{
 	{
-		out: `usage: %[1]v
+		out: cli.Dedent(`
+			usage: %[1]v
 
-%[2]v
+			%[2]v
 
-`,
+		`),
 	},
 	{
 		usage: "<options>",
-		out: `usage: %[1]v <options>
+		out: cli.Dedent(`
+			usage: %[1]v <options>
 
-%[2]v
+			%[2]v
 
-`,
+		`),
 	},
 	{
 		usage: []string{
 			"add <path>...",
 			"rm <path>...",
 		},
-		out: `usage: %[1]v add <path>...
-   or: %[1]v rm <path>...
+		out: cli.Dedent(`
+			usage: %[1]v add <path>...
+			   or: %[1]v rm <path>...
 
-%[2]v
+			%[2]v
 
-`,
+		`),
 	},
 	{
 		desc: "    desc",
-		out: `usage: %[1]v
+		out: cli.Dedent(`
+			usage: %[1]v
 
-    desc
+			    desc
 
-%[2]v
+			%[2]v
 
-`,
+		`),
 	},
 	{
 		epilog: "epilog",
-		out: `usage: %[1]v
+		out: cli.Dedent(`
+			usage: %[1]v
 
-%[2]v
+			%[2]v
 
-epilog
-`,
+			epilog
+		`),
 	},
 	{
 		desc:   "    desc",
 		epilog: "epilog",
-		out: `usage: %[1]v
+		out: cli.Dedent(`
+			usage: %[1]v
 
-    desc
+			    desc
 
-%[2]v
+			%[2]v
 
-epilog
-`,
+			epilog
+		`),
 	},
 	{
 		cmds: []*cli.Command{
@@ -173,15 +181,16 @@ epilog
 				Name: []string{"cmd"},
 			},
 		},
-		out: `usage: %[1]v
+		out: cli.Dedent(`
+			usage: %[1]v
 
-commands:
+			commands:
 
-  cmd
+			  cmd
 
-%[2]v
+			%[2]v
 
-`,
+		`),
 	},
 	{
 		cmds: []*cli.Command{
@@ -190,15 +199,16 @@ commands:
 				Desc: "desc",
 			},
 		},
-		out: `usage: %[1]v
+		out: cli.Dedent(`
+			usage: %[1]v
 
-commands:
+			commands:
 
-  cmd    desc
+			  cmd    desc
 
-%[2]v
+			%[2]v
 
-`,
+		`),
 	},
 	{
 		cmds: []*cli.Command{
@@ -207,15 +217,16 @@ commands:
 				Desc: " desc \n",
 			},
 		},
-		out: `usage: %[1]v
+		out: cli.Dedent(`
+			usage: %[1]v
 
-commands:
+			commands:
 
-  cmd    desc
+			  cmd    desc
 
-%[2]v
+			%[2]v
 
-`,
+		`),
 	},
 }
 
@@ -248,43 +259,48 @@ var commandHelpTests = []struct {
 	out    string
 }{
 	{
-		out: `usage: %[1]v %[2]v
-`,
+		out: cli.Dedent(`
+			usage: %[1]v %[2]v
+		`),
 	},
 	{
 		alias: []string{"alias"},
-		out: `usage: %[1]v %[2]v
+		out: cli.Dedent(`
+			usage: %[1]v %[2]v
 
-alias: alias
-`,
+			alias: alias
+		`),
 	},
 	{
 		desc: "    desc",
-		out: `usage: %[1]v %[2]v
+		out: cli.Dedent(`
+			usage: %[1]v %[2]v
 
-    desc
+			    desc
 
-`,
+		`),
 	},
 	{
 		epilog: "epilog",
-		out: `usage: %[1]v %[2]v
+		out: cli.Dedent(`
+			usage: %[1]v %[2]v
 
-epilog
-`,
+			epilog
+		`),
 	},
 	{
 		alias:  []string{"alias"},
 		desc:   "    desc",
 		epilog: "epilog",
-		out: `usage: %[1]v %[2]v
+		out: cli.Dedent(`
+			usage: %[1]v %[2]v
 
-alias: alias
+			alias: alias
 
-    desc
+			    desc
 
-epilog
-`,
+			epilog
+		`),
 	},
 	{
 		cmds: []*cli.Command{
@@ -293,13 +309,14 @@ epilog
 				Desc: "desc",
 			},
 		},
-		out: `usage: %[1]v %[2]v
+		out: cli.Dedent(`
+			usage: %[1]v %[2]v
 
-commands:
+			commands:
 
-  subcmd    desc
+			  subcmd    desc
 
-`,
+		`),
 	},
 }
 
@@ -416,7 +433,7 @@ func TestMetaVar(t *testing.T) {
 		}
 		flags.MetaVar(n, tt.metaVar)
 		if g, e := cli.MetaVar(flags.Lookup(n)), tt.expected; g != e {
-			t.Errorf("expected %v, got %v", e, g)
+			t.Errorf("expected %q, got %q", e, g)
 		}
 	}
 }

@@ -1,7 +1,7 @@
 //
 // go.cli :: command_test.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -102,8 +102,8 @@ func TestCommand(t *testing.T) {
 	cmd.Flags.Bool("cmd", false, "")
 	cmd.Action = func(ctx *cli.Context) error {
 		for _, n := range []string{"g", "cmd"} {
-			if g, e := ctx.Bool(n), true; g != e {
-				t.Errorf("expected %v, got %v", e, g)
+			if !ctx.Bool(n) {
+				t.Errorf("Context.Bool(%q) = false, expected true", n)
 			}
 		}
 		return nil
@@ -134,7 +134,7 @@ func TestFindCommand(t *testing.T) {
 		t.Fatal(err)
 	}
 	if g, e := cmd.Name[0], "foo"; g != e {
-		t.Errorf("expected %v, got %v", e, g)
+		t.Errorf("expected %q, got %q", e, g)
 	}
 
 	_, err = cli.FindCommand(cmds, "b")
@@ -151,7 +151,7 @@ func TestFindCommand(t *testing.T) {
 		t.Fatal(err)
 	}
 	if g, e := cmd.Name[0], "bar"; g != e {
-		t.Errorf("expected %v, got %v", e, g)
+		t.Errorf("expected %q, got %q", e, g)
 	}
 }
 

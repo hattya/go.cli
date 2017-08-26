@@ -1,7 +1,7 @@
 //
 // go.cli :: cli_test.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -74,14 +74,14 @@ func TestCLI(t *testing.T) {
 	ctx := cli.NewContext(app)
 	for i := 0; i < len(ctx.Args); i++ {
 		if g, e := ctx.Args[i], strconv.FormatInt(int64(i), 10); g != e {
-			t.Errorf("expected %v, got %v", e, g)
+			t.Errorf("Context.Args[%v] = %v, expected %v", i, g, e)
 		}
 	}
 	if g, e := len(ctx.Args), 2; g != e {
-		t.Errorf("expected %v, got %v", e, g)
+		t.Errorf("len(Context.Args) = %v, expected %v", g, e)
 	}
 	if g := ctx.Value(""); g != nil {
-		t.Errorf("expected %v, got %v", nil, g)
+		t.Errorf("Context.Value(%q) = %v, expected %v", "", g, nil)
 	}
 	for _, tt := range []struct {
 		name string
@@ -99,11 +99,12 @@ func TestCLI(t *testing.T) {
 	} {
 		rv := tt.fn.Call([]reflect.Value{reflect.ValueOf(tt.name)})
 		if g, e := rv[0].Interface(), tt.val; g != e {
-			t.Errorf("expected %v, got %v", e, g)
+			t.Errorf("Context.%s(%q) = %v, expected %v", strings.Title(tt.name), tt.name, g, e)
 		}
 	}
-	if g, e := ctx.Value("var"), "var"; g != e {
-		t.Errorf("expected %v, got %v", e, g)
+	n := "var"
+	if g, e := ctx.Value(n), "var"; g != e {
+		t.Errorf("Context.Value(%q) = %v, expected %v", n, g, e)
 	}
 }
 
@@ -244,52 +245,59 @@ var errorHandlerTests = []struct {
 	},
 	{
 		err: cli.ErrCommand,
-		out: `usage: %[1]v
-`,
+		out: cli.Dedent(`
+			usage: %[1]v
+		`),
 	},
 	{
 		err: &cli.Abort{
 			Err: fmt.Errorf("abort"),
 		},
-		out: `%[1]v: abort
-`,
+		out: cli.Dedent(`
+			%[1]v: abort
+		`),
 	},
 	{
 		err: &cli.Abort{
 			Err:  fmt.Errorf("abort"),
 			Hint: "hint",
 		},
-		out: `%[1]v: abort
-hint
-`,
+		out: cli.Dedent(`
+			%[1]v: abort
+			hint
+		`),
 	},
 	{
 		err: cli.FlagError("flag error"),
-		out: `%[1]v: flag error
-usage: %[1]v
-`,
+		out: cli.Dedent(`
+			%[1]v: flag error
+			usage: %[1]v
+		`),
 	},
 	{
 		err: &cli.CommandError{
 			Name: "cmd",
 		},
-		out: `%[1]v: unknown command 'cmd'
-usage: %[1]v
-`,
+		out: cli.Dedent(`
+			%[1]v: unknown command 'cmd'
+			usage: %[1]v
+		`),
 	},
 	{
 		err: &cli.CommandError{
 			Name: "b",
 			List: []string{"bar", "baz"},
 		},
-		out: `%[1]v: command 'b' is ambiguous
-    bar baz
-`,
+		out: cli.Dedent(`
+			%[1]v: command 'b' is ambiguous
+			    bar baz
+		`),
 	},
 	{
 		err: fmt.Errorf("error"),
-		out: `%[1]v: error
-`,
+		out: cli.Dedent(`
+			%[1]v: error
+		`),
 	},
 }
 

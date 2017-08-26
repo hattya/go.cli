@@ -1,7 +1,7 @@
 //
 // go.cli :: action_test.go
 //
-//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -108,8 +108,8 @@ func TestSubcommand(t *testing.T) {
 	subcmd.Flags.Bool("subcmd", false, "")
 	subcmd.Action = func(ctx *cli.Context) error {
 		for _, n := range []string{"g", "cmd", "subcmd"} {
-			if g, e := ctx.Bool(n), true; g != e {
-				t.Errorf("expected %v, got %v", e, g)
+			if !ctx.Bool(n) {
+				t.Errorf("Context.Bool(%q) = false, expected true", n)
 			}
 		}
 		return nil
@@ -206,10 +206,10 @@ func TestChain(t *testing.T) {
 		cmd.Action = func(ctx *cli.Context) error {
 			n := ctx.Stack[0].Name[0]
 			if g, e := n, args[i]; g != e {
-				t.Errorf("expected %v, got %v", e, g)
+				t.Errorf("expected %q, got %q", e, g)
 			}
-			if g, e := ctx.Bool(n), true; g != e {
-				t.Errorf("expected %v, got %v", e, g)
+			if !ctx.Bool(n) {
+				t.Errorf("Context.Bool(%q) = false, expected true", n)
 			}
 			i += 2
 			return nil
