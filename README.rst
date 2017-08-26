@@ -9,6 +9,9 @@ A command line interface framework
 .. image:: https://ci.appveyor.com/api/projects/status/fwccrp8kt0g2mhik/branch/master?svg=true
    :target: https://ci.appveyor.com/project/hattya/go-cli
 
+.. image:: https://codecov.io/gh/hattya/go.cli/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/hattya/go.cli
+
 
 Installation
 ------------
@@ -56,4 +59,4 @@ Usage
 License
 -------
 
-go.cli is distributed under the terms of the MIT License
+go.cli is distributed under the terms of the MIT License.
