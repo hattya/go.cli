@@ -1,7 +1,7 @@
 //
 // go.cli :: cli.go
 //
-//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -27,7 +27,6 @@
 package cli
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -160,31 +159,26 @@ func (ui *CLI) Password(prompt string) (string, error) {
 }
 
 func (ui *CLI) readLine() (string, error) {
-	b := make([]byte, 1024)
+	b := make([]byte, 1)
 	var in []byte
 	for {
 		n, err := ui.Stdin.Read(b)
+		if 0 < n {
+			if b[0] == '\n' {
+				if 0 < len(in) && in[len(in)-1] == '\r' {
+					in = in[:len(in)-1]
+				}
+				return string(in), nil
+			}
+			in = append(in, b...)
+		}
 		if err != nil {
-			return "", err
-		}
-		if n == 0 {
-			if len(in) == 0 {
-				return "", io.EOF
+			if err == io.EOF && 0 < len(in) {
+				err = nil
 			}
-			break
-		}
-		if i := bytes.IndexByte(b[:n], '\n'); i != -1 {
-			n = i
-		}
-		in = append(in, b[:n]...)
-		if n < len(b) {
-			if 0 < len(in) && in[len(in)-1] == '\r' {
-				in = in[:len(in)-1]
-			}
-			break
+			return string(in), err
 		}
 	}
-	return string(in), nil
 }
 
 var (
