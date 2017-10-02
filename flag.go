@@ -99,6 +99,10 @@ func (f *Flag) countVerb(s string) (n, pct int) {
 	return
 }
 
+func (f *Flag) sort() {
+	sort.Slice(f.Name, func(i, j int) bool { return len(f.Name[i]) < len(f.Name[j]) || f.Name[i] < f.Name[j] })
+}
+
 type boolFlag interface {
 	flag.Getter
 	IsBoolFlag() bool
@@ -212,7 +216,7 @@ func (fs *FlagSet) NArg() int { return fs.fs.NArg() }
 func (fs *FlagSet) Parsed() bool { return fs.fs.Parsed() }
 
 func (fs *FlagSet) Add(f *Flag) {
-	sort.Sort(flagName(f.Name))
+	f.sort()
 	for _, n := range f.Name {
 		fs.fs.Var(f.Value, n, f.Usage)
 		fs.vars[n] = f
@@ -422,7 +426,7 @@ func (fs *FlagSet) each(name, envVar string, fn func(string)) *Flag {
 		Name:   list,
 		EnvVar: envVar,
 	}
-	sort.Sort(flagName(f.Name))
+	f.sort()
 	for _, n := range f.Name {
 		fn(n)
 		fs.vars[n] = f
@@ -440,12 +444,6 @@ func (fs *FlagSet) each(name, envVar string, fn func(string)) *Flag {
 	}
 	return f
 }
-
-type flagName []string
-
-func (p flagName) Len() int           { return len(p) }
-func (p flagName) Less(i, j int) bool { return len(p[i]) < len(p[j]) || p[i] < p[j] }
-func (p flagName) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 type FlagError string
 
