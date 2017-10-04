@@ -197,10 +197,12 @@ func (e Abort) Error() string { return e.Err.Error() }
 func ErrorHandler(ctx *Context, err error) error {
 	switch err := err.(type) {
 	case nil:
-	case FlagError:
-		ctx.UI.Errorf("%v: %v\n", ctx.Name(), err)
-		Help(ctx)
-	case *CommandError:
+	case Abort:
+		ctx.UI.Errorf("%v: %v\n", ctx.UI.Name, err)
+		if err.Hint != "" {
+			ctx.UI.Errorln(err.Hint)
+		}
+	case CommandError:
 		if len(err.List) == 0 {
 			ctx.UI.Errorf("%v: %v\n", ctx.Name(), err)
 			Help(ctx)
@@ -208,11 +210,9 @@ func ErrorHandler(ctx *Context, err error) error {
 			ctx.UI.Errorf("%v: command '%v' is ambiguous\n", ctx.Name(), err.Name)
 			ctx.UI.Errorf("    %v\n", strings.Join(err.List, " "))
 		}
-	case *Abort:
-		ctx.UI.Errorf("%v: %v\n", ctx.UI.Name, err)
-		if err.Hint != "" {
-			ctx.UI.Errorln(err.Hint)
-		}
+	case FlagError:
+		ctx.UI.Errorf("%v: %v\n", ctx.Name(), err)
+		Help(ctx)
 	default:
 		if err == ErrCommand {
 			Help(ctx)

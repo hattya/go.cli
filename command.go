@@ -1,7 +1,7 @@
 //
 // go.cli :: command.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -98,7 +98,7 @@ L:
 
 	switch len(set) {
 	case 0:
-		err = &CommandError{Name: name}
+		err = CommandError{Name: name}
 	case 1:
 		for _, cmd = range set {
 		}
@@ -113,7 +113,10 @@ L:
 				i++
 			}
 			sort.Strings(list)
-			err = &CommandError{name, list}
+			err = CommandError{
+				Name: name,
+				List: list,
+			}
 		}
 	}
 	return
@@ -124,7 +127,7 @@ type CommandError struct {
 	List []string
 }
 
-func (e *CommandError) Error() string {
+func (e CommandError) Error() string {
 	if len(e.List) == 0 {
 		return fmt.Sprintf("unknown command '%v'", e.Name)
 	}

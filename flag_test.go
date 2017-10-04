@@ -38,10 +38,7 @@ import (
 )
 
 func TestFlagSet(t *testing.T) {
-	envVar := func(s string) string {
-		return fmt.Sprintf("__CLI_%v__", strings.ToUpper(s))
-	}
-
+	envVar := func(s string) string { return fmt.Sprintf("__CLI_%v__", strings.ToUpper(s)) }
 	values := map[string]interface{}{
 		"bool":     true,
 		"duration": 1 * time.Millisecond,
@@ -89,8 +86,7 @@ func TestFlagSet(t *testing.T) {
 		}
 	}
 
-	args := []string{"0", "1"}
-	if err := flags.Parse(args); err != nil {
+	if err := flags.Parse([]string{"0", "1"}); err != nil {
 		t.Fatal(err)
 	}
 	if !flags.Parsed() {
@@ -99,25 +95,21 @@ func TestFlagSet(t *testing.T) {
 	if g, e := flags.NFlag(), 0; g != e {
 		t.Errorf("FlagSet.NFlag() = %v, expected %v", g, e)
 	}
+	if g, e := flags.NArg(), 2; g != e {
+		t.Errorf("len(FlagSet.NArg()) = %v, expected %v", g, e)
+	}
 	for i := 0; i < flags.NArg(); i++ {
 		if g, e := flags.Arg(i), strconv.FormatInt(int64(i), 10); g != e {
 			t.Errorf("FlagSet.Arg(%v) = %v, expected %v", i, g, e)
 		}
 	}
-	if g, e := len(flags.Args()), len(args); g != e {
-		t.Errorf("len(FlagSet.Args()) = %v, expected %v", g, e)
-	}
 	i := 0
-	flags.Visit(func(*cli.Flag) {
-		i++
-	})
+	flags.Visit(func(*cli.Flag) { i++ })
 	if g, e := i, 0; g != e {
 		t.Errorf("expected %v, got %v", e, g)
 	}
 	i = 0
-	flags.VisitAll(func(*cli.Flag) {
-		i++
-	})
+	flags.VisitAll(func(*cli.Flag) { i++ })
 	if g, e := i, len(environ); g != e {
 		t.Errorf("expected %v, got %v", e, g)
 	}
@@ -150,9 +142,7 @@ func TestAddFlags(t *testing.T) {
 		t.Errorf("expected %q, got %q", e, g)
 	}
 	i := 0
-	flags.VisitAll(func(*cli.Flag) {
-		i++
-	})
+	flags.VisitAll(func(*cli.Flag) { i++ })
 	if g, e := i, 1; g != e {
 		t.Errorf("expected %v, got %v", e, g)
 	}
@@ -202,48 +192,46 @@ func TestResetFlags(t *testing.T) {
 	os.Setenv(envVar("int"), "-2")
 	defer os.Setenv(envVar("int"), "")
 
+	type test struct {
+		name  string
+		value interface{}
+	}
+
 	flags := cli.NewFlagSet()
 	flags.Bool("h, help", false, "")
-	flags.IntEnv(envVar("int"), "int", 0, "")
-	flags.UintEnv(envVar("uint"), "uint", 0, "")
+	flags.IntEnv(envVar("int"), "int", -1, "")
+	flags.UintEnv(envVar("uint"), "uint", 1, "")
 
 	flags.Set("h", "true")
 	flags.Reset()
 	if flags.Parsed() {
 		t.Error("FlagSet.Parsed() = true, expected false")
 	}
-	n := "h"
-	if flags.Get(n).(bool) {
-		t.Errorf("FlagSet.Get(%q) = true, expected false", n)
-	}
-	n = "int"
-	if g, e := flags.Get(n), -2; g != e {
-		t.Errorf("FlagSet.Get(%q) = %v, expected %v", n, g, e)
-	}
-	n = "uint"
-	if g, e := flags.Get(n), uint(0); g != e {
-		t.Errorf("FlagSet.Get(%q) = %v, expected %v", n, g, e)
+	for _, tt := range []test{
+		{"h", false},
+		{"int", -2},
+		{"uint", uint(1)},
+	} {
+		if g, e := flags.Get(tt.name), tt.value; g != e {
+			t.Errorf("FlagSet.Get(%q) = %v, expected %v", tt.name, g, e)
+		}
 	}
 
-	args := []string{"-h", "-int", "-1", "-uint", "1"}
-	if err := flags.Parse(args); err != nil {
+	if err := flags.Parse(strings.Fields("-h -int 0 -uint 0")); err != nil {
 		t.Fatal(err)
 	}
 	flags.Reset()
 	if flags.Parsed() {
 		t.Error("FlagSet.Parsed() = true, expected false")
 	}
-	n = "h"
-	if flags.Get(n).(bool) {
-		t.Errorf("FlagSet.Get(%q) = true, expected false", n)
-	}
-	n = "int"
-	if g, e := flags.Get(n), -2; g != e {
-		t.Errorf("FlagSet.Get(%q) = %v, expected %v", n, g, e)
-	}
-	n = "uint"
-	if g, e := flags.Get(n), uint(0); g != e {
-		t.Errorf("FlagSet.Get(%q) = %v, expected %v", n, g, e)
+	for _, tt := range []test{
+		{"h", false},
+		{"int", -2},
+		{"uint", uint(1)},
+	} {
+		if g, e := flags.Get(tt.name), tt.value; g != e {
+			t.Errorf("FlagSet.Get(%q) = %v, expected %v", tt.name, g, e)
+		}
 	}
 }
 
@@ -251,33 +239,31 @@ func TestVisitFlags(t *testing.T) {
 	flags := cli.NewFlagSet()
 	flags.Bool("h, help", false, "")
 	flags.Bool("version", false, "")
-	args := []string{"-h"}
-	if err := flags.Parse(args); err != nil {
+	if err := flags.Parse([]string{"-h"}); err != nil {
 		t.Fatal(err)
 	}
-	for _, n := range []string{"h", "help"} {
-		if !flags.Lookup(n).Value.Get().(bool) {
-			t.Errorf("FlagSet.Lookup(%q).Value.Get() = false, expected true", n)
+	for _, tt := range []struct {
+		name  string
+		value bool
+	}{
+		{"h", true},
+		{"help", true},
+		{"version", false},
+	} {
+		if g, e := flags.Lookup(tt.name).Value.Get(), tt.value; g != e {
+			t.Errorf("FlagSet.Lookup(%q).Value.Get() = %v, expected %v", tt.name, g, e)
 		}
-	}
-	n := "version"
-	if flags.Lookup(n).Value.Get().(bool) {
-		t.Errorf("FlagSet.Lookup(%q).Value.Get() = true, expected false", n)
 	}
 	if g, e := flags.NFlag(), 1; g != e {
 		t.Errorf("FlagSet.NFlag() = %v, expected %v", g, e)
 	}
 	i := 0
-	flags.Visit(func(*cli.Flag) {
-		i++
-	})
+	flags.Visit(func(*cli.Flag) { i++ })
 	if g, e := i, 1; g != e {
 		t.Errorf("expected %v, got %v", e, g)
 	}
 	i = 0
-	flags.VisitAll(func(*cli.Flag) {
-		i++
-	})
+	flags.VisitAll(func(*cli.Flag) { i++ })
 	if g, e := i, 2; g != e {
 		t.Errorf("expected %v, got %v", e, g)
 	}
@@ -301,8 +287,7 @@ func TestChoiceFlag(t *testing.T) {
 		"foobar": 4,
 	}, "")
 
-	args := []string{"-c", "foo"}
-	if err := flags.Parse(args); err != nil {
+	if err := flags.Parse([]string{"-c", "foo"}); err != nil {
 		t.Fatal(err)
 	}
 	n := "c"
@@ -311,8 +296,7 @@ func TestChoiceFlag(t *testing.T) {
 	}
 
 	flags.Reset()
-	args = []string{"-c", ""}
-	switch err := flags.Parse(args); {
+	switch err := flags.Parse([]string{"-c", ""}); {
 	case err == nil:
 		t.Fatal("expected error")
 	case !strings.Contains(err.Error(), `choose from "bar", "baz", "foo" or "foobar"`):
@@ -320,8 +304,7 @@ func TestChoiceFlag(t *testing.T) {
 	}
 
 	flags.Reset()
-	args = []string{"-c", "b"}
-	switch err := flags.Parse(args); {
+	switch err := flags.Parse([]string{"-c", "b"}); {
 	case err == nil:
 		t.Fatal("expected error")
 	case !strings.Contains(err.Error(), `choose from "bar", "baz", "foo" or "foobar"`):
@@ -338,8 +321,7 @@ func TestPrefixChoiceFlag(t *testing.T) {
 		"foobar": 4,
 	}, "")
 
-	args := []string{"-c", "foo"}
-	if err := flags.Parse(args); err != nil {
+	if err := flags.Parse([]string{"-c", "foo"}); err != nil {
 		t.Fatal(err)
 	}
 	n := "c"
@@ -348,8 +330,7 @@ func TestPrefixChoiceFlag(t *testing.T) {
 	}
 
 	flags.Reset()
-	args = []string{"-c", ""}
-	switch err := flags.Parse(args); {
+	switch err := flags.Parse([]string{"-c", ""}); {
 	case err == nil:
 		t.Fatal("expected error")
 	case !strings.Contains(err.Error(), `choose from "bar", "baz", "foo" or "foobar"`):
@@ -357,8 +338,7 @@ func TestPrefixChoiceFlag(t *testing.T) {
 	}
 
 	flags.Reset()
-	args = []string{"-c", "b"}
-	switch err := flags.Parse(args); {
+	switch err := flags.Parse([]string{"-c", "b"}); {
 	case err == nil:
 		t.Fatal("expected error")
 	case !strings.Contains(err.Error(), `choose from "bar" or "baz"`):

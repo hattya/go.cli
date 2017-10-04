@@ -45,16 +45,13 @@ func TestCLI(t *testing.T) {
 	app := cli.NewCLI()
 	app.Stdout = ioutil.Discard
 	app.Stderr = ioutil.Discard
-	args := []string{"-g"}
-	if err := app.Run(args); err == nil {
-		t.Error("expected error")
-	} else {
-		if _, ok := err.(cli.FlagError); !ok {
-			t.Errorf("expected cli.FlagError, got %T", err)
-		}
+	switch err := app.Run([]string{"-cli"}).(type) {
+	case cli.FlagError:
 		if !strings.Contains(err.Error(), "not defined") {
 			t.Error("unexpected error:", err)
 		}
+	default:
+		t.Errorf("expected FlagError, got %#v", err)
 	}
 
 	app = cli.NewCLI()
@@ -67,18 +64,17 @@ func TestCLI(t *testing.T) {
 	app.Flags.Uint("uint", 0, "")
 	app.Flags.Uint64("uint64", 0, "")
 	app.Flags.Var("var", &value{}, "")
-	args = strings.Fields("-bool -duration 1ms -float64 3.14 -int -1 -int64 -64 -string string -uint 1 -uint64 64 -var var 0 1")
-	if err := app.Run(args); err != nil {
+	if err := app.Run(strings.Fields("-bool -duration 1ms -float64 3.14 -int -1 -int64 -64 -string string -uint 1 -uint64 64 -var var 0 1")); err != nil {
 		t.Fatal(err)
 	}
 	ctx := cli.NewContext(app)
+	if g, e := len(ctx.Args), 2; g != e {
+		t.Errorf("len(Context.Args) = %v, expected %v", g, e)
+	}
 	for i := 0; i < len(ctx.Args); i++ {
 		if g, e := ctx.Args[i], strconv.FormatInt(int64(i), 10); g != e {
 			t.Errorf("Context.Args[%v] = %v, expected %v", i, g, e)
 		}
-	}
-	if g, e := len(ctx.Args), 2; g != e {
-		t.Errorf("len(Context.Args) = %v, expected %v", g, e)
 	}
 	if g := ctx.Value(""); g != nil {
 		t.Errorf("Context.Value(%q) = %v, expected %v", "", g, nil)
@@ -96,15 +92,16 @@ func TestCLI(t *testing.T) {
 		{"string", reflect.ValueOf(ctx.String), "string"},
 		{"uint", reflect.ValueOf(ctx.Uint), uint(1)},
 		{"uint64", reflect.ValueOf(ctx.Uint64), uint64(64)},
+		{"var", reflect.ValueOf(ctx.Value), "var"},
 	} {
 		rv := tt.fn.Call([]reflect.Value{reflect.ValueOf(tt.name)})
 		if g, e := rv[0].Interface(), tt.val; g != e {
-			t.Errorf("Context.%s(%q) = %v, expected %v", strings.Title(tt.name), tt.name, g, e)
+			m := strings.Title(tt.name)
+			if tt.fn.Pointer() == reflect.ValueOf(ctx.Value).Pointer() {
+				m = "Value"
+			}
+			t.Errorf("Context.%v(%q) = %v, expected %v", m, tt.name, g, e)
 		}
-	}
-	n := "var"
-	if g, e := ctx.Value(n), "var"; g != e {
-		t.Errorf("Context.Value(%q) = %v, expected %v", n, g, e)
 	}
 }
 
@@ -169,10 +166,10 @@ func TestPrompt(t *testing.T) {
 	app.Stdin = &stdin
 	app.Stdout = &stdout
 	prompt := ">> "
-
 	for _, tt := range promptTests {
 		stdin.Reset()
 		stdout.Reset()
+
 		stdin.WriteString(tt.in)
 		l, err := app.Prompt(prompt)
 		if tt.err == nil {
@@ -222,12 +219,11 @@ func TestPrepare(t *testing.T) {
 		return nil
 	}
 	app.Add(&cli.Command{
-		Name: []string{"true"},
+		Name: []string{"cmd"},
 		Data: 0,
 	})
 
-	args := []string{"true"}
-	if err := app.Run(args); err != nil {
+	if err := app.Run([]string{app.Cmds[0].Name[0]}); err != nil {
 		t.Fatal(err)
 	}
 	if g, e := app.Cmds[0].Data, 1; g != e {
@@ -244,59 +240,59 @@ var errorHandlerTests = []struct {
 		out: "",
 	},
 	{
-		err: cli.ErrCommand,
-		out: cli.Dedent(`
-			usage: %[1]v
-		`),
-	},
-	{
-		err: &cli.Abort{
+		err: cli.Abort{
 			Err: fmt.Errorf("abort"),
 		},
 		out: cli.Dedent(`
-			%[1]v: abort
+			%v: abort
 		`),
 	},
 	{
-		err: &cli.Abort{
+		err: cli.Abort{
 			Err:  fmt.Errorf("abort"),
 			Hint: "hint",
 		},
 		out: cli.Dedent(`
-			%[1]v: abort
+			%v: abort
 			hint
+		`),
+	},
+	{
+		err: cli.CommandError{
+			Name: "cmd",
+		},
+		out: cli.Dedent(`
+			%v: unknown command 'cmd'
+			usage: %[1]v
+		`),
+	},
+	{
+		err: cli.CommandError{
+			Name: "b",
+			List: []string{"bar", "baz"},
+		},
+		out: cli.Dedent(`
+			%v: command 'b' is ambiguous
+			    bar baz
 		`),
 	},
 	{
 		err: cli.FlagError("flag error"),
 		out: cli.Dedent(`
-			%[1]v: flag error
+			%v: flag error
 			usage: %[1]v
 		`),
 	},
 	{
-		err: &cli.CommandError{
-			Name: "cmd",
-		},
+		err: cli.ErrCommand,
 		out: cli.Dedent(`
-			%[1]v: unknown command 'cmd'
-			usage: %[1]v
-		`),
-	},
-	{
-		err: &cli.CommandError{
-			Name: "b",
-			List: []string{"bar", "baz"},
-		},
-		out: cli.Dedent(`
-			%[1]v: command 'b' is ambiguous
-			    bar baz
+			usage: %v
 		`),
 	},
 	{
 		err: fmt.Errorf("error"),
 		out: cli.Dedent(`
-			%[1]v: error
+			%v: error
 		`),
 	},
 }
@@ -309,6 +305,7 @@ func TestErrorHandler(t *testing.T) {
 	ctx := cli.NewContext(app)
 	for _, tt := range errorHandlerTests {
 		b.Reset()
+
 		cli.ErrorHandler(ctx, tt.err)
 		var out string
 		if tt.out != "" {

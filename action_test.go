@@ -35,106 +35,90 @@ import (
 )
 
 func TestSubcommand(t *testing.T) {
-	setup := func() (*cli.CLI, *cli.Command, *cli.Command) {
+	setup := func() *cli.CLI {
 		app := cli.NewCLI()
 		app.Stdout = ioutil.Discard
 		app.Stderr = ioutil.Discard
-		cmd := &cli.Command{
+		app.Add(&cli.Command{
 			Name:  []string{"cmd"},
 			Flags: cli.NewFlagSet(),
-		}
-		app.Add(cmd)
-		subcmd := &cli.Command{
+		})
+		app.Cmds[0].Add(&cli.Command{
 			Name:  []string{"subcmd"},
 			Flags: cli.NewFlagSet(),
-		}
-		cmd.Add(subcmd)
-		return app, cmd, subcmd
+		})
+		return app
 	}
 
-	app, cmd, _ := setup()
-	args := []string{cmd.Name[0], "_"}
-	if err := app.Run(args); err == nil {
-		t.Error("expected error")
-	} else {
-		if _, ok := err.(*cli.CommandError); !ok {
-			t.Errorf("expected *cli.CommandError, got %T", err)
-		}
-		if !strings.Contains(err.Error(), "unknown") {
-			t.Error("unexpected error:", err)
-		}
-	}
-
-	app, cmd, _ = setup()
-	args = []string{cmd.Name[0]}
-	switch err := app.Run(args); {
-	case err == nil:
-		t.Error("expected error")
-	case err != cli.ErrCommand:
+	app := setup()
+	if err := app.Run([]string{app.Cmds[0].Name[0], app.Cmds[0].Cmds[0].Name[0]}); err != nil {
 		t.Error("unexpected error:", err)
 	}
 
-	app, cmd, subcmd := setup()
-	args = []string{cmd.Name[0], subcmd.Name[0], "-g"}
-	if err := app.Run(args); err == nil {
-		t.Error("expected error")
-	} else {
-		if _, ok := err.(cli.FlagError); !ok {
-			t.Errorf("expected cli.FlagError, got %T", err)
-		}
-		if !strings.Contains(err.Error(), "not defined") {
-			t.Error("unexpected error:", err)
-		}
-	}
-
-	app, cmd, subcmd = setup()
-	args = []string{cmd.Name[0], subcmd.Name[0]}
-	if err := app.Run(args); err != nil {
+	app = setup()
+	app.Cmds[0].Cmds[0].Action = func(*cli.Context) error { return nil }
+	if err := app.Run([]string{app.Cmds[0].Name[0], app.Cmds[0].Cmds[0].Name[0]}); err != nil {
 		t.Error("unexpected error:", err)
 	}
 
-	app, cmd, subcmd = setup()
-	subcmd.Action = func(*cli.Context) error {
-		return nil
-	}
-	args = []string{cmd.Name[0], subcmd.Name[0]}
-	if err := app.Run(args); err != nil {
-		t.Error("unexpected error:", err)
-	}
-
-	app, cmd, subcmd = setup()
-	app.Flags.Bool("g", false, "")
-	cmd.Flags.Bool("cmd", false, "")
-	subcmd.Flags.Bool("subcmd", false, "")
-	subcmd.Action = func(ctx *cli.Context) error {
-		for _, n := range []string{"g", "cmd", "subcmd"} {
+	app = setup()
+	app.Flags.Bool("cli", false, "")
+	app.Cmds[0].Flags.Bool("cmd", false, "")
+	app.Cmds[0].Cmds[0].Flags.Bool("subcmd", false, "")
+	app.Cmds[0].Cmds[0].Action = func(ctx *cli.Context) error {
+		for _, n := range []string{"cli", "cmd", "subcmd"} {
 			if !ctx.Bool(n) {
 				t.Errorf("Context.Bool(%q) = false, expected true", n)
 			}
 		}
 		return nil
 	}
-	args = []string{"-g", cmd.Name[0], "-cmd", subcmd.Name[0], "-subcmd"}
-	if err := app.Run(args); err != nil {
+	if err := app.Run([]string{"-cli", app.Cmds[0].Name[0], "-cmd", app.Cmds[0].Cmds[0].Name[0], "-subcmd"}); err != nil {
 		t.Error("unexpected error:", err)
+	}
+	// no subcommand specified
+	app = setup()
+	if err := app.Run([]string{app.Cmds[0].Name[0]}); err != cli.ErrCommand {
+		t.Errorf("expected ErrCommand, got %#v", err)
+	}
+	// unknown subcommand
+	app = setup()
+	switch err := app.Run([]string{app.Cmds[0].Name[0], "_"}).(type) {
+	case cli.CommandError:
+		if !strings.Contains(err.Error(), "unknown") {
+			t.Error("unexpected error:", err)
+		}
+	default:
+		t.Errorf("expected CommandError, got %#v", err)
+	}
+	// flag error
+	app = setup()
+	switch err := app.Run([]string{app.Cmds[0].Name[0], app.Cmds[0].Cmds[0].Name[0], "-subcmd"}).(type) {
+	case cli.FlagError:
+		if !strings.Contains(err.Error(), "not defined") {
+			t.Error("unexpected error:", err)
+		}
+	default:
+		t.Errorf("expected FlagError, got %#v", err)
 	}
 }
 
 func TestSubcommandPanic(t *testing.T) {
 	defer func() {
-		if r := recover(); r == nil {
+		if recover() == nil {
 			t.Error("expected panic")
 		}
 	}()
 
 	app := cli.NewCLI()
-	cmd := &cli.Command{Name: []string{"cmd"}}
-	app.Add(cmd)
-	cmd.Add(&cli.Command{
+	app.Add(&cli.Command{
+		Name: []string{"cmd"},
+	})
+	app.Cmds[0].Add(&cli.Command{
 		Name:  []string{"subcmd"},
 		Flags: cli.NewFlagSet(),
 	})
-	app.Run([]string{"cmd", "subcmd"})
+	app.Run([]string{app.Cmds[0].Name[0], app.Cmds[0].Cmds[0].Name[0]})
 }
 
 func TestChain(t *testing.T) {
@@ -155,42 +139,7 @@ func TestChain(t *testing.T) {
 	}
 
 	app := setup()
-	args := []string{"_"}
-	if err := app.Run(args); err == nil {
-		t.Error("expected error")
-	} else {
-		if _, ok := err.(*cli.CommandError); !ok {
-			t.Errorf("expected *cli.CommandError, got %T", err)
-		}
-		if !strings.Contains(err.Error(), "unknown") {
-			t.Error("unexpected error:", err)
-		}
-	}
-
-	app = setup()
-	args = []string{}
-	switch err := app.Run(args); {
-	case err == nil:
-		t.Error("expected error")
-	case err != cli.ErrCommand:
-		t.Error("unexpected error:", err)
-	}
-
-	app = setup()
-	args = []string{app.Cmds[0].Name[0], "-chain"}
-	if err := app.Run(args); err == nil {
-		t.Error("expected error")
-	} else {
-		if _, ok := err.(cli.FlagError); !ok {
-			t.Errorf("expected cli.FlagError, got %T", err)
-		}
-		if !strings.Contains(err.Error(), "not defined") {
-			t.Error("unexpected error:", err)
-		}
-	}
-
-	app = setup()
-	args = nil
+	var args []string
 	for _, cmd := range app.Cmds {
 		args = append(args, cmd.Name[0])
 	}
@@ -218,47 +167,64 @@ func TestChain(t *testing.T) {
 	if err := app.Run(args); err != nil {
 		t.Error("unexpected error:", err)
 	}
+	// no command specified
+	app = setup()
+	if err := app.Run(nil); err != cli.ErrCommand {
+		t.Errorf("expected ErrCommand, got %#v", err)
+	}
+	// unknown command
+	app = setup()
+	switch err := app.Run([]string{"_"}).(type) {
+	case cli.CommandError:
+		if !strings.Contains(err.Error(), "unknown") {
+			t.Error("unexpected error:", err)
+		}
+	default:
+		t.Errorf("expected CommandError, got %#v", err)
+	}
+	// flag error
+	app = setup()
+	switch err := app.Run([]string{app.Cmds[0].Name[0], "-chain"}).(type) {
+	case cli.FlagError:
+		if !strings.Contains(err.Error(), "not defined") {
+			t.Error("unexpected error:", err)
+		}
+	default:
+		t.Errorf("expected FlagError, got %#v", err)
+	}
 }
 
 func TestOption(t *testing.T) {
-	setup := func() (*cli.CLI, *cli.Command) {
+	setup := func() *cli.CLI {
 		app := cli.NewCLI()
-		app.Action = cli.Option(func(*cli.Context) error {
-			return nil
-		})
+		app.Action = cli.Option(func(*cli.Context) error { return nil })
 		app.Stdout = ioutil.Discard
 		app.Stderr = ioutil.Discard
-		cmd := &cli.Command{
+		app.Add(&cli.Command{
 			Name:  []string{"cmd"},
 			Flags: cli.NewFlagSet(),
-		}
-		app.Add(cmd)
-		return app, cmd
+		})
+		return app
 	}
 
-	app, _ := setup()
-	args := []string{}
-	if err := app.Run(args); err != nil {
+	app := setup()
+	if err := app.Run(nil); err != nil {
 		t.Error(err)
 	}
 
-	app, cmd := setup()
-	args = []string{cmd.Name[0]}
-	if err := app.Run(args); err != nil {
+	app = setup()
+	if err := app.Run([]string{app.Cmds[0].Name[0]}); err != nil {
 		t.Error(err)
 	}
 }
 
 func TestSimple(t *testing.T) {
 	app := cli.NewCLI()
-	app.Action = cli.Simple(func(*cli.Context) error {
-		return nil
-	})
+	app.Action = cli.Simple(func(*cli.Context) error { return nil })
 	app.Stdout = ioutil.Discard
 	app.Stderr = ioutil.Discard
 
-	args := []string{}
-	if err := app.Run(args); err != nil {
+	if err := app.Run(nil); err != nil {
 		t.Error(err)
 	}
 }

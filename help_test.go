@@ -85,10 +85,10 @@ func TestHelpCommand(t *testing.T) {
 			app.Stderr = &b
 			app.Add(cli.NewHelpCommand())
 			switch err := app.Run(tt.args); {
-			case !tt.err && err != nil:
-				t.Fatal(err)
 			case tt.err && err == nil:
 				t.Fatal("expected error")
+			case !tt.err && err != nil:
+				t.Fatal(err)
 			}
 			if err := testOut(strings.SplitN(b.String(), "\n", 2)[0], fmt.Sprintf(tt.out, app.Name)); err != nil {
 				t.Error(err)
@@ -231,17 +231,15 @@ var helpTests = []struct {
 }
 
 func TestHelp(t *testing.T) {
-	var b bytes.Buffer
-	args := []string{"--help"}
 	for _, tt := range helpTests {
-		b.Reset()
+		var b bytes.Buffer
 		app := cli.NewCLI()
 		app.Usage = tt.usage
 		app.Desc = tt.desc
 		app.Epilog = tt.epilog
 		app.Cmds = tt.cmds
 		app.Stdout = &b
-		if err := app.Run(args); err != nil {
+		if err := app.Run([]string{"--help"}); err != nil {
 			t.Fatal(err)
 		}
 		if err := testOut(b.String(), fmt.Sprintf(tt.out, app.Name, options)); err != nil {
@@ -321,25 +319,22 @@ var commandHelpTests = []struct {
 }
 
 func TestCommandHelp(t *testing.T) {
-	var b bytes.Buffer
-	name := []string{"cmd"}
-	args := []string{name[0], "--help"}
 	for _, tt := range commandHelpTests {
-		b.Reset()
+		var b bytes.Buffer
 		app := cli.NewCLI()
 		app.Stdout = &b
 		app.Add(&cli.Command{
-			Name:   append(append([]string{}, name...), tt.alias...),
+			Name:   append([]string{"cmd"}, tt.alias...),
 			Usage:  tt.usage,
 			Desc:   tt.desc,
 			Epilog: tt.epilog,
 			Cmds:   tt.cmds,
 			Flags:  cli.NewFlagSet(),
 		})
-		if err := app.Run(args); err != nil {
+		if err := app.Run([]string{app.Cmds[0].Name[0], "--help"}); err != nil {
 			t.Fatal(err)
 		}
-		if err := testOut(b.String(), fmt.Sprintf(tt.out, app.Name, name[0])); err != nil {
+		if err := testOut(b.String(), fmt.Sprintf(tt.out, app.Name, app.Cmds[0].Name[0])); err != nil {
 			t.Error(err)
 		}
 	}
@@ -375,7 +370,7 @@ func TestUsage(t *testing.T) {
 
 func TestUsagePanic(t *testing.T) {
 	defer func() {
-		if r := recover(); r == nil {
+		if recover() == nil {
 			t.Error("expected panic")
 		}
 	}()
@@ -386,41 +381,41 @@ func TestUsagePanic(t *testing.T) {
 }
 
 var metaVarTests = []struct {
-	name     string
-	value    interface{}
-	metaVar  string
-	expected string
+	name    string
+	value   interface{}
+	metaVar string
+	out     string
 }{
 	{
-		name:     "b,bool",
-		value:    false,
-		metaVar:  "",
-		expected: "",
+		name:    "b, bool",
+		value:   false,
+		metaVar: "",
+		out:     "",
 	},
 	{
-		name:     "s,string",
-		value:    "",
-		metaVar:  "",
-		expected: " <string>",
+		name:    "s, string",
+		value:   "",
+		metaVar: "",
+		out:     " <string>",
 	},
 	{
-		name:     "i",
-		value:    0,
-		metaVar:  "",
-		expected: " <i>",
+		name:    "i",
+		value:   0,
+		metaVar: "",
+		out:     " <i>",
 	},
 	{
-		name:     "b,bool",
-		value:    false,
-		metaVar:  "=bool",
-		expected: "=bool",
+		name:    "b, bool",
+		value:   false,
+		metaVar: "=bool",
+		out:     "=bool",
 	},
 }
 
 func TestMetaVar(t *testing.T) {
 	for _, tt := range metaVarTests {
 		list := strings.Split(tt.name, ",")
-		n := list[len(list)-1]
+		n := strings.TrimSpace(list[len(list)-1])
 
 		flags := cli.NewFlagSet()
 		switch v := tt.value.(type) {
@@ -432,7 +427,7 @@ func TestMetaVar(t *testing.T) {
 			flags.String(tt.name, v, "")
 		}
 		flags.MetaVar(n, tt.metaVar)
-		if g, e := cli.MetaVar(flags.Lookup(n)), tt.expected; g != e {
+		if g, e := cli.MetaVar(flags.Lookup(n)), tt.out; g != e {
 			t.Errorf("expected %q, got %q", e, g)
 		}
 	}

@@ -44,15 +44,13 @@ var versionTests = []struct {
 }
 
 func TestVersionCommand(t *testing.T) {
-	var b bytes.Buffer
-	args := []string{"version"}
 	for _, tt := range versionTests {
-		b.Reset()
+		var b bytes.Buffer
 		app := cli.NewCLI()
 		app.Version = tt.in
 		app.Stdout = &b
 		app.Add(cli.NewVersionCommand())
-		if err := app.Run(args); err != nil {
+		if err := app.Run([]string{"version"}); err != nil {
 			t.Fatal(err)
 		}
 		if err := testOut(b.String(), fmt.Sprintf(versionOut, app.Name, tt.out)); err != nil {
@@ -62,14 +60,12 @@ func TestVersionCommand(t *testing.T) {
 }
 
 func TestVersion(t *testing.T) {
-	var b bytes.Buffer
-	args := []string{"--version"}
 	for _, tt := range versionTests {
-		b.Reset()
+		var b bytes.Buffer
 		app := cli.NewCLI()
 		app.Version = tt.in
 		app.Stdout = &b
-		if err := app.Run(args); err != nil {
+		if err := app.Run([]string{"--version"}); err != nil {
 			t.Fatal(err)
 		}
 		if err := testOut(b.String(), fmt.Sprintf(versionOut, app.Name, tt.out)); err != nil {
@@ -77,7 +73,7 @@ func TestVersion(t *testing.T) {
 		}
 	}
 
-	b.Reset()
+	var b bytes.Buffer
 	app := cli.NewCLI()
 	app.Version = "1.0"
 	app.Stdout = &b
@@ -85,8 +81,7 @@ func TestVersion(t *testing.T) {
 		Name:  []string{"cmd"},
 		Flags: cli.NewFlagSet(),
 	})
-	args = []string{"cmd", "--version"}
-	if err := app.Run(args); err != nil {
+	if err := app.Run([]string{"cmd", "--version"}); err != nil {
 		t.Fatal(err)
 	}
 	if err := testOut(b.String(), fmt.Sprintf(versionOut, app.Name, app.Version)); err != nil {

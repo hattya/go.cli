@@ -1,7 +1,7 @@
 //
 // go.cli :: help.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -51,7 +51,7 @@ func NewHelpCommand() *Command {
 				cmd, err := ctx.Command()
 				switch {
 				case err != nil:
-					return &Abort{
+					return Abort{
 						Err:  err,
 						Hint: fmt.Sprintf("type '%v help' for usage", ctx.Name()),
 					}

@@ -69,7 +69,7 @@ func (f *Flag) Format(sep string) string {
 	b.WriteString(MetaVar(f))
 	if f.Usage != "" {
 		b.WriteString(sep)
-		if n, pct := f.countVerb(f.Usage); 0 < n {
+		if n, pct := f.numVerb(f.Usage); 0 < n {
 			if n != pct {
 				fmt.Fprintf(&b, f.Usage, f.Default)
 			} else {
@@ -82,7 +82,7 @@ func (f *Flag) Format(sep string) string {
 	return b.String()
 }
 
-func (f *Flag) countVerb(s string) (n, pct int) {
+func (f *Flag) numVerb(s string) (n, pct int) {
 	v := -1
 	for i, r := range s {
 		switch {

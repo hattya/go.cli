@@ -33,8 +33,7 @@ import (
 )
 
 var dedentTests = []struct {
-	in  string
-	out string
+	in, out string
 }{
 	// no margin
 	{
