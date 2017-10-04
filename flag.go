@@ -69,14 +69,15 @@ func (f *Flag) Format(sep string) string {
 	b.WriteString(MetaVar(f))
 	if f.Usage != "" {
 		b.WriteString(sep)
-		if n, pct := f.numVerb(f.Usage); 0 < n {
+		s := strings.Replace(f.Usage, "\n", "\n"+sep, -1)
+		if n, pct := f.numVerb(s); 0 < n {
 			if n != pct {
-				fmt.Fprintf(&b, f.Usage, f.Default)
+				fmt.Fprintf(&b, s, f.Default)
 			} else {
-				fmt.Fprintf(&b, f.Usage)
+				fmt.Fprintf(&b, s)
 			}
 		} else {
-			b.WriteString(f.Usage)
+			b.WriteString(s)
 		}
 	}
 	return b.String()

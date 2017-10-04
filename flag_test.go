@@ -181,6 +181,12 @@ func TestFormatFlags(t *testing.T) {
 		if g, e := f.Format("\t"), fmt.Sprintf(s+verb, f.Name[0], usage, f.Default); g != e {
 			t.Errorf("expected %q, got %q", e, g)
 		}
+
+		verb = "\n(default: %v)"
+		f.Usage = usage + verb
+		if g, e := f.Format("\t"), fmt.Sprintf(strings.Replace(s+verb, "\n", "\n\t", -1), f.Name[0], usage, f.Default); g != e {
+			t.Errorf("expected %q, got %q", e, g)
+		}
 	})
 }
 
