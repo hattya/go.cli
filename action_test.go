@@ -139,9 +139,9 @@ func TestChain(t *testing.T) {
 	}
 
 	app := setup()
-	var args []string
-	for _, cmd := range app.Cmds {
-		args = append(args, cmd.Name[0])
+	args := make([]string, len(app.Cmds))
+	for i, cmd := range app.Cmds {
+		args[i] = cmd.Name[0]
 	}
 	if err := app.Run(args); err != nil {
 		t.Error("unexpected error:", err)
@@ -191,6 +191,32 @@ func TestChain(t *testing.T) {
 		}
 	default:
 		t.Errorf("expected FlagError, got %#v", err)
+	}
+}
+
+func TestChainInterrupt(t *testing.T) {
+	app := cli.NewCLI()
+	app.Action = cli.Chain
+	app.Stdout = ioutil.Discard
+	app.Stderr = ioutil.Discard
+	for _, n := range []string{"foo", "bar", "baz"} {
+		app.Add(&cli.Command{
+			Name: []string{n},
+			Action: func(ctx *cli.Context) error {
+				ctx.Interrupt()
+				return nil
+			},
+		})
+	}
+
+	args := make([]string, len(app.Cmds))
+	for i, cmd := range app.Cmds {
+		args[i] = cmd.Name[0]
+	}
+	switch err := app.Run(args).(type) {
+	case cli.Interrupt:
+	default:
+		t.Errorf("expected Interrupt, got %#v", err)
 	}
 }
 

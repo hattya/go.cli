@@ -1,7 +1,7 @@
 //
 // go.cli :: context.go
 //
-//   Copyright (c) 2014 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -28,6 +28,7 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"time"
 )
 
@@ -123,4 +124,12 @@ func (ctx *Context) Prepare(cmd *Command) error {
 
 func (ctx *Context) ErrorHandler(err error) error {
 	return ctx.UI.ErrorHandler(ctx, err)
+}
+
+func (ctx *Context) Context() context.Context {
+	return ctx.UI.Context()
+}
+
+func (ctx *Context) Interrupt() {
+	ctx.UI.Interrupt()
 }

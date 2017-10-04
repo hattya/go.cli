@@ -1,7 +1,7 @@
 //
 // go.cli :: action.go
 //
-//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -38,7 +38,7 @@ func Subcommand(ctx *Context) error {
 			err = cmd.Run(ctx)
 		}
 	}
-	return ctx.ErrorHandler(err)
+	return err
 }
 
 func Chain(ctx *Context) error {
@@ -47,6 +47,12 @@ func Chain(ctx *Context) error {
 	}
 
 	for {
+		select {
+		case <-ctx.Context().Done():
+			return ctx.Context().Err()
+		default:
+		}
+
 		cmd, err := ctx.Command()
 		if cmd != nil {
 			if err = ctx.Prepare(cmd); err == nil {
@@ -61,7 +67,7 @@ func Chain(ctx *Context) error {
 		}
 		switch {
 		case err != nil:
-			return ctx.ErrorHandler(err)
+			return err
 		case len(ctx.Args) == 0:
 			return nil
 		}
@@ -77,7 +83,7 @@ func Option(action Action) Action {
 		if err == nil {
 			err = action(ctx)
 		}
-		return ctx.ErrorHandler(err)
+		return err
 	}
 }
 
@@ -87,6 +93,6 @@ func Simple(action Action) Action {
 		if err == nil {
 			err = action(ctx)
 		}
-		return ctx.ErrorHandler(err)
+		return err
 	}
 }

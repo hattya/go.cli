@@ -27,6 +27,7 @@
 package cli
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -55,6 +56,8 @@ type CLI struct {
 	Stdout io.Writer
 	Stderr io.Writer
 
+	ctx     context.Context
+	cancel  context.CancelFunc
 	help    bool
 	version bool
 }
@@ -64,9 +67,12 @@ func NewCLI() *CLI {
 	if runtime.GOOS == "windows" {
 		name = name[:len(name)-len(filepath.Ext(name))]
 	}
+	ctx, cancel := context.WithCancel(context.Background())
 	return &CLI{
-		Name:  name,
-		Flags: NewFlagSet(),
+		Name:   name,
+		Flags:  NewFlagSet(),
+		ctx:    ctx,
+		cancel: cancel,
 	}
 }
 
@@ -98,6 +104,11 @@ func (ui *CLI) Run(args []string) error {
 	}
 
 	ctx := NewContext(ui)
+	select {
+	case <-ui.ctx.Done():
+		return ctx.ErrorHandler(Interrupt{})
+	default:
+	}
 	if err := ui.Flags.Parse(args); err != nil {
 		return ctx.ErrorHandler(err)
 	}
@@ -108,11 +119,25 @@ func (ui *CLI) Run(args []string) error {
 	case ui.version && ctx.Bool("version"):
 		return Version(ctx)
 	}
-	return ui.Action(ctx)
+	err := ui.Action(ctx)
+	select {
+	case <-ui.ctx.Done():
+		err = Interrupt{}
+	default:
+	}
+	return ctx.ErrorHandler(err)
 }
 
 func (ui *CLI) Add(cmd *Command) {
 	ui.Cmds = append(ui.Cmds, cmd)
+}
+
+func (ui *CLI) Context() context.Context {
+	return ui.ctx
+}
+
+func (ui *CLI) Interrupt() {
+	ui.cancel()
 }
 
 func (ui *CLI) Print(a ...interface{}) (int, error) {
@@ -193,6 +218,10 @@ type Abort struct {
 }
 
 func (e Abort) Error() string { return e.Err.Error() }
+
+type Interrupt struct{}
+
+func (e Interrupt) Error() string { return "interrupted" }
 
 func ErrorHandler(ctx *Context, err error) error {
 	switch err := err.(type) {

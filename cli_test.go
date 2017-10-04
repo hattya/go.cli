@@ -126,6 +126,19 @@ func TestCLIOut(t *testing.T) {
 	}
 }
 
+func TestInterrupt(t *testing.T) {
+	app := cli.NewCLI()
+	app.Stdout = ioutil.Discard
+	app.Stderr = ioutil.Discard
+
+	app.Interrupt()
+	switch err := app.Run(nil).(type) {
+	case cli.Interrupt:
+	default:
+		t.Errorf("expected Interrupt, got %#v", err)
+	}
+}
+
 func TestTitle(t *testing.T) {
 	app := cli.NewCLI()
 
@@ -281,6 +294,12 @@ var errorHandlerTests = []struct {
 		out: cli.Dedent(`
 			%v: flag error
 			usage: %[1]v
+		`),
+	},
+	{
+		err: cli.Interrupt{},
+		out: cli.Dedent(`
+			%v: interrupted
 		`),
 	},
 	{
