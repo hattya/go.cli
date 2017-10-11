@@ -1,7 +1,7 @@
 //
 // go.cli :: cli_windows.go
 //
-//   Copyright (c) 2014-2016 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2017 Akinori Hattori <hattya@gmail.com>
 //
 //   Permission is hereby granted, free of charge, to any person
 //   obtaining a copy of this software and associated documentation files
@@ -29,10 +29,12 @@ package cli
 import (
 	"syscall"
 	"unsafe"
+
+	"golang.org/x/sys/windows"
 )
 
 func (ui *CLI) title(title string) error {
-	p, err := syscall.UTF16PtrFromString(title)
+	p, err := windows.UTF16PtrFromString(title)
 	if err != nil {
 		return err
 	}
@@ -40,7 +42,7 @@ func (ui *CLI) title(title string) error {
 }
 
 var (
-	kernel32 = syscall.NewLazyDLL("kernel32.dll")
+	kernel32 = windows.NewLazySystemDLL("kernel32.dll")
 
 	pSetConsoleTitle = kernel32.NewProc("SetConsoleTitleW")
 )
