@@ -79,7 +79,7 @@ func TestFlagSet(t *testing.T) {
 	flags.StringEnv(envVar("string"), "string", "", "")
 	flags.UintEnv(envVar("uint"), "uint", 0, "")
 	flags.Uint64Env(envVar("uint64"), "uint64", 0, "")
-	flags.VarEnv(envVar("var"), "var", &value{}, "")
+	flags.VarEnv(envVar("var"), "var", new(value), "")
 	for n, v := range values {
 		if g, e := flags.Lookup(n).Value.Get(), v; g != e {
 			t.Errorf("FlagSet.Lookup(%q).Value.Get() = %v, expected %v", n, g, e)
@@ -129,7 +129,7 @@ func TestFlagSet(t *testing.T) {
 func TestAddFlags(t *testing.T) {
 	f := &cli.Flag{
 		Name:   []string{"var"},
-		Value:  &value{},
+		Value:  new(value),
 		EnvVar: "__CLI_VAR__",
 	}
 

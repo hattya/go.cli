@@ -63,7 +63,7 @@ func TestCLI(t *testing.T) {
 	app.Flags.String("string", "", "")
 	app.Flags.Uint("uint", 0, "")
 	app.Flags.Uint64("uint64", 0, "")
-	app.Flags.Var("var", &value{}, "")
+	app.Flags.Var("var", new(value), "")
 	if err := app.Run(strings.Fields("-bool -duration 1ms -float64 3.14 -int -1 -int64 -64 -string string -uint 1 -uint64 64 -var var 0 1")); err != nil {
 		t.Fatal(err)
 	}
