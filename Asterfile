@@ -1,65 +1,24 @@
-var proj = os.getwd().split(/[/\\]+/).slice(-1);
-var title = 'Aster ☆ ' + proj;
+var os = require('os');
+var path = require('path');
+var go = require('language/go').go;
+var rst2html = require('language/restructuredtext').rst2html;
+
+var title = 'Aster ☆ ' + path.basename(os.getwd());
 
 aster.title(title);
 
 // go
 aster.watch(/.+\.go$/, function() {
-  if (go('get', '-t', '-v')) {
-    return;
-  }
-  if (go('vet')) {
-    return;
-  }
-  if (go('test', '-v', '-covermode', 'count', '-coverprofile', 'cover.out')) {
-    return;
-  }
-  cover('-func', 'cover.out');
-  cover('-html', 'cover.out', '-o', 'coverage.html');
+  if (go.get('-t', '-v')) return; 
+  if (go.vet()) return;
+  var rv = go.test('-v', '-race', '-covermode', 'count', '-coverprofile', 'cover.out')
   aster.title(title);
+  if (rv) return;
+  go.tool.cover('-func', 'cover.out');
+  go.tool.cover('-html', 'cover.out', '-o', 'coverage.html');
 });
-
-function go() {
-  var args = ['go'].concat(Array.prototype.slice.call(arguments));
-  var cmd = args[1] === 'get' ? 'bulid' : args[1];
-  var rv = system(args);
-  if (!rv) {
-    aster.notify('success', proj + ': ' + cmd, cmd + ' passed');
-  } else {
-    aster.notify('failure', proj + ': ' + cmd, cmd + ' failed');
-  }
-  return rv;
-}
-
-function cover() {
-  return system(['go', 'tool', 'cover'].concat(Array.prototype.slice.call(arguments)));
-}
 
 // rst
 aster.watch(/.+\.rst$/, function(files) {
-  files.forEach(rst2html);
+  files.some(function(rst) { return rst2html({ options: ['--strict'], src: rst }); });
 });
-
-function rst2html(rst) {
-  var rst2html;
-  var ok = ['rst2html.py', 'rst2html'].some(function(s) {
-    rst2html = s;
-    return os.whence(rst2html);
-  });
-  if (!ok) {
-    return true;
-  }
-  var rv = system([rst2html, '--strict', rst, rst.slice(0, -4) + '.html']);
-  if (!rv) {
-    aster.notify('success', proj + ': rst2html', rst);
-  } else {
-    aster.notify('failure', proj + ': rst2html', rst + ' failed');
-  }
-  return rv;
-}
-
-// system
-function system(args) {
-  console.log('+ ' + args.join(' '));
-  return os.system(args);
-}
