@@ -9,13 +9,12 @@ aster.title(title);
 
 // go
 aster.watch(/.+\.go$/, function() {
-  if (go.get('-t', '-v')) return; 
-  if (go.vet()) return;
-  var rv = go.test('-v', '-race', '-covermode', 'count', '-coverprofile', 'cover.out')
+  var rv = go.test('-v', '-race', '-covermode', 'atomic', '-coverprofile', 'cover.out');
   aster.title(title);
   if (rv) return;
   go.tool.cover('-func', 'cover.out');
   go.tool.cover('-html', 'cover.out', '-o', 'coverage.html');
+  if (go.vet()) return;
 });
 
 // rst
