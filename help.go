@@ -60,21 +60,31 @@ func ShowHelp(ctx *Context) error {
 	return t.Execute(w, ctx)
 }
 
-const helpTmpl = `{{range usage .}}{{.}}
-{{end}}{{with or (cmd .) .UI}}{{if .Desc}}
+const helpTmpl = `{{range usage . -}}
+{{.}}
+{{end}}
+{{- with or (cmd .) .UI -}}
+{{if .Desc}}
 {{.Desc}}
-{{end}}{{range $i, $cmd := cmds .Cmds}}{{if eq $i 0}}
+{{end}}
+{{- range $i, $cmd := cmds .Cmds -}}
+{{if eq $i 0}}
 commands:
 
 {{end}}  {{format $cmd "\t"}}
-{{end}}{{$flags := flags .Flags}}{{range $i, $f := $flags}}{{if eq $i 0 }}
+{{end}}
+{{- $flags := flags .Flags -}}
+{{- range $i, $f := $flags -}}
+{{if eq $i 0}}
 options:
 
 {{end}}  {{$f.Format "\t"}}
-{{end}}{{if .Epilog}}
+{{end}}
+{{- if .Epilog}}
 {{.Epilog}}
 {{else if or .Desc (lt 0 (len .Cmds)) (lt 0 (len $flags))}}
-{{end}}{{end}}`
+{{end -}}
+{{end}}`
 
 func FuncMap() template.FuncMap {
 	return template.FuncMap{
