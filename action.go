@@ -24,7 +24,7 @@ func Subcommand(ctx *Context) error {
 }
 
 func Chain(ctx *Context) error {
-	if 0 < len(ctx.Stack) {
+	if len(ctx.Stack) > 0 {
 		return nil
 	}
 
@@ -58,7 +58,7 @@ func Chain(ctx *Context) error {
 
 func Option(action Action) Action {
 	return func(ctx *Context) error {
-		if 0 < len(ctx.Args) {
+		if len(ctx.Args) > 0 {
 			return DefaultAction(ctx)
 		}
 		err := ctx.Prepare(nil)

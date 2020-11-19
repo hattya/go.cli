@@ -29,7 +29,7 @@ func init() {
 		"rxvt",
 		"screen",
 	} {
-		if 0 < i {
+		if i > 0 {
 			b.WriteRune('|')
 		}
 		b.WriteString(regexp.QuoteMeta(s))

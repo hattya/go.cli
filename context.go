@@ -34,7 +34,7 @@ func NewContext(ui *CLI) *Context {
 }
 
 func (ctx *Context) Name() string {
-	if 0 < len(ctx.Stack) {
+	if len(ctx.Stack) > 0 {
 		var b bytes.Buffer
 		b.WriteString(ctx.UI.Name)
 		for _, cmd := range ctx.Stack {

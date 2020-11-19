@@ -38,7 +38,7 @@ func (f *Flag) IsBool() bool {
 func (f *Flag) Format(sep string) string {
 	var b bytes.Buffer
 	for i, n := range f.Name {
-		if 0 < i {
+		if i > 0 {
 			b.WriteString(", ")
 		}
 		if len(n) == 1 {
@@ -52,7 +52,7 @@ func (f *Flag) Format(sep string) string {
 	if f.Usage != "" {
 		b.WriteString(sep)
 		s := strings.Replace(f.Usage, "\n", "\n"+sep, -1)
-		if n, pct := f.numVerb(s); 0 < n {
+		if n, pct := f.numVerb(s); n > 0 {
 			if n != pct {
 				fmt.Fprintf(&b, s, f.Default)
 			} else {
@@ -371,7 +371,7 @@ func (c *choiceValue) error(m map[string]interface{}) error {
 	b.WriteString("choose from ")
 	n := len(list) - 1
 	for i, k := range list {
-		if 0 < i {
+		if i > 0 {
 			if i < n {
 				b.WriteString(", ")
 			} else {

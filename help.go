@@ -23,13 +23,13 @@ func NewHelpCommand() *Command {
 		Desc:  "show help for a specified command",
 		Flags: NewFlagSet(),
 		Action: func(ctx *Context) error {
-			if 1 < len(ctx.Stack) {
+			if len(ctx.Stack) > 1 {
 				ctx.Cmds = ctx.Stack[len(ctx.Stack)-2].Cmds
 			} else {
 				ctx.Cmds = ctx.UI.Cmds
 			}
 			ctx.Stack = nil
-			for 0 < len(ctx.Args) {
+			for len(ctx.Args) > 0 {
 				cmd, err := ctx.Command()
 				switch {
 				case err != nil:
@@ -133,7 +133,7 @@ func flags(fs *FlagSet) []*Flag {
 func FormatUsage(ctx *Context) []string {
 	var cmd *Command
 	var u interface{}
-	if 0 < len(ctx.Stack) {
+	if len(ctx.Stack) > 0 {
 		cmd = ctx.Stack[len(ctx.Stack)-1]
 		u = cmd.Usage
 	} else {
@@ -167,7 +167,7 @@ func FormatUsage(ctx *Context) []string {
 		usage[i] = b.String()
 		b.Reset()
 	}
-	if cmd != nil && 1 < len(cmd.Name) {
+	if cmd != nil && len(cmd.Name) > 1 {
 		usage = append(usage, "", "alias: "+strings.Join(cmd.Name[1:], ", "))
 	}
 	return usage
@@ -179,7 +179,7 @@ func FormatMetaVar(f *Flag) string {
 	}
 	s := f.Name[0]
 	for _, n := range f.Name {
-		if 1 < len(n) {
+		if len(n) > 1 {
 			s = n
 			break
 		}

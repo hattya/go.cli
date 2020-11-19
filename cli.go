@@ -170,9 +170,9 @@ func (ui *CLI) readLine() (string, error) {
 	var in []byte
 	for {
 		n, err := ui.Stdin.Read(b)
-		if 0 < n {
+		if n > 0 {
 			if b[0] == '\n' {
-				if 0 < len(in) && in[len(in)-1] == '\r' {
+				if len(in) > 0 && in[len(in)-1] == '\r' {
 					in = in[:len(in)-1]
 				}
 				return string(in), nil
@@ -180,7 +180,7 @@ func (ui *CLI) readLine() (string, error) {
 			in = append(in, b...)
 		}
 		if err != nil {
-			if err == io.EOF && 0 < len(in) {
+			if err == io.EOF && len(in) > 0 {
 				err = nil
 			}
 			return string(in), err
