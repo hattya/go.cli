@@ -15,7 +15,7 @@ import (
 	"os"
 	"regexp"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 var xtermRx *regexp.Regexp
@@ -39,7 +39,7 @@ func init() {
 }
 
 func (ui *CLI) title(title string) error {
-	if f, ok := ui.Stdout.(*os.File); ok && terminal.IsTerminal(int(f.Fd())) {
+	if f, ok := ui.Stdout.(*os.File); ok && term.IsTerminal(int(f.Fd())) {
 		if xtermRx.MatchString(os.Getenv("TERM")) {
 			ui.Printf("\x1b]2;%v\a", title)
 		}

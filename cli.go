@@ -18,7 +18,7 @@ import (
 	"runtime"
 	"strings"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 type CLI struct {
@@ -158,8 +158,8 @@ func (ui *CLI) Prompt(prompt string) (string, error) {
 func (ui *CLI) Password(prompt string) (string, error) {
 	ui.Print(prompt)
 	defer ui.Println()
-	if f, ok := ui.Stdin.(*os.File); ok && terminal.IsTerminal(int(f.Fd())) {
-		b, err := terminal.ReadPassword(int(f.Fd()))
+	if f, ok := ui.Stdin.(*os.File); ok && term.IsTerminal(int(f.Fd())) {
+		b, err := term.ReadPassword(int(f.Fd()))
 		return string(b), err
 	}
 	return ui.readLine()
