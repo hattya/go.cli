@@ -3,6 +3,9 @@ go.cli
 
 A command line interface framework
 
+.. image:: https://github.com/hattya/go.cli/workflows/CI/badge.svg
+   :target: https://github.com/hattya/go.cli/actions?query=workflow:CI
+
 .. image:: https://semaphoreci.com/api/v1/hattya/go-cli/branches/master/badge.svg
    :target: https://semaphoreci.com/hattya/go-cli
 
