@@ -1,7 +1,7 @@
 //
 // go.cli :: help.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -9,7 +9,6 @@
 package cli
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 	"text/tabwriter"
@@ -111,7 +110,7 @@ func cmds(cmds []*Command) []*Command {
 }
 
 func format(cmd *Command, sep string) string {
-	var b bytes.Buffer
+	var b strings.Builder
 	b.WriteString(cmd.Name[0])
 	if cmd.Desc != "" {
 		b.WriteString(sep)
@@ -152,8 +151,8 @@ func FormatUsage(ctx *Context) []string {
 		panic(fmt.Sprintf("unknown type '%T'", v))
 	}
 
-	var b bytes.Buffer
 	for i, s := range usage {
+		var b strings.Builder
 		if i == 0 {
 			b.WriteString("usage: ")
 		} else {
@@ -165,7 +164,6 @@ func FormatUsage(ctx *Context) []string {
 			b.WriteString(s)
 		}
 		usage[i] = b.String()
-		b.Reset()
 	}
 	if cmd != nil && len(cmd.Name) > 1 {
 		usage = append(usage, "", "alias: "+strings.Join(cmd.Name[1:], ", "))

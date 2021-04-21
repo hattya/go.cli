@@ -1,7 +1,7 @@
 //
 // go.cli :: cli_unix.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -11,9 +11,9 @@
 package cli
 
 import (
-	"bytes"
 	"os"
 	"regexp"
+	"strings"
 
 	"golang.org/x/term"
 )
@@ -21,7 +21,7 @@ import (
 var xtermRx *regexp.Regexp
 
 func init() {
-	var b bytes.Buffer
+	var b strings.Builder
 	b.WriteString(`^(?:`)
 	for i, s := range []string{
 		"xterm",

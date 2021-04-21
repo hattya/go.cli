@@ -1,7 +1,7 @@
 //
 // go.cli :: flag.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -9,7 +9,6 @@
 package cli
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -36,7 +35,7 @@ func (f *Flag) IsBool() bool {
 }
 
 func (f *Flag) Format(sep string) string {
-	var b bytes.Buffer
+	var b strings.Builder
 	for i, n := range f.Name {
 		if i > 0 {
 			b.WriteString(", ")
@@ -367,7 +366,7 @@ func (c *choiceValue) error(m map[string]interface{}) error {
 	}
 	list.Sort()
 
-	var b bytes.Buffer
+	var b strings.Builder
 	b.WriteString("choose from ")
 	n := len(list) - 1
 	for i, k := range list {

@@ -1,7 +1,7 @@
 //
 // go.cli :: context.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -9,8 +9,8 @@
 package cli
 
 import (
-	"bytes"
 	"context"
+	"strings"
 	"time"
 )
 
@@ -35,7 +35,7 @@ func NewContext(ui *CLI) *Context {
 
 func (ctx *Context) Name() string {
 	if len(ctx.Stack) > 0 {
-		var b bytes.Buffer
+		var b strings.Builder
 		b.WriteString(ctx.UI.Name)
 		for _, cmd := range ctx.Stack {
 			b.WriteRune(' ')
