@@ -3,6 +3,6 @@ module github.com/hattya/go.cli
 go 1.15
 
 require (
-	golang.org/x/sys v0.0.0-20201113233024-12cec1faf1ba
-	golang.org/x/term v0.0.0-20201117132131-f5c789dd3221
+	golang.org/x/sys v0.0.0-20210831042530-f4d43177bf5e
+	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b
 )
