@@ -1,7 +1,7 @@
 //
 // go.cli :: action_test.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2022 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -9,7 +9,7 @@
 package cli_test
 
 import (
-	"io/ioutil"
+	"io"
 	"strings"
 	"testing"
 
@@ -19,8 +19,8 @@ import (
 func TestSubcommand(t *testing.T) {
 	setup := func() *cli.CLI {
 		app := cli.NewCLI()
-		app.Stdout = ioutil.Discard
-		app.Stderr = ioutil.Discard
+		app.Stdout = io.Discard
+		app.Stderr = io.Discard
 		app.Add(&cli.Command{
 			Name:  []string{"cmd"},
 			Flags: cli.NewFlagSet(),
@@ -107,8 +107,8 @@ func TestChain(t *testing.T) {
 	setup := func() *cli.CLI {
 		app := cli.NewCLI()
 		app.Action = cli.Chain
-		app.Stdout = ioutil.Discard
-		app.Stderr = ioutil.Discard
+		app.Stdout = io.Discard
+		app.Stderr = io.Discard
 		for _, n := range []string{"foo", "bar", "baz"} {
 			cmd := &cli.Command{
 				Name:  []string{n},
@@ -179,8 +179,8 @@ func TestChain(t *testing.T) {
 func TestChainInterrupt(t *testing.T) {
 	app := cli.NewCLI()
 	app.Action = cli.Chain
-	app.Stdout = ioutil.Discard
-	app.Stderr = ioutil.Discard
+	app.Stdout = io.Discard
+	app.Stderr = io.Discard
 	for _, n := range []string{"foo", "bar", "baz"} {
 		app.Add(&cli.Command{
 			Name: []string{n},
@@ -206,8 +206,8 @@ func TestOption(t *testing.T) {
 	setup := func() *cli.CLI {
 		app := cli.NewCLI()
 		app.Action = cli.Option(func(*cli.Context) error { return nil })
-		app.Stdout = ioutil.Discard
-		app.Stderr = ioutil.Discard
+		app.Stdout = io.Discard
+		app.Stderr = io.Discard
 		app.Add(&cli.Command{
 			Name:  []string{"cmd"},
 			Flags: cli.NewFlagSet(),
@@ -229,8 +229,8 @@ func TestOption(t *testing.T) {
 func TestSimple(t *testing.T) {
 	app := cli.NewCLI()
 	app.Action = cli.Simple(func(*cli.Context) error { return nil })
-	app.Stdout = ioutil.Discard
-	app.Stderr = ioutil.Discard
+	app.Stdout = io.Discard
+	app.Stderr = io.Discard
 
 	if err := app.Run(nil); err != nil {
 		t.Error(err)

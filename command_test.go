@@ -1,7 +1,7 @@
 //
 // go.cli :: command_test.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2022 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -9,7 +9,7 @@
 package cli_test
 
 import (
-	"io/ioutil"
+	"io"
 	"strings"
 	"testing"
 
@@ -19,8 +19,8 @@ import (
 func TestCommand(t *testing.T) {
 	setup := func() *cli.CLI {
 		app := cli.NewCLI()
-		app.Stdout = ioutil.Discard
-		app.Stderr = ioutil.Discard
+		app.Stdout = io.Discard
+		app.Stderr = io.Discard
 		app.Add(&cli.Command{
 			Name:  []string{"cmd"},
 			Flags: cli.NewFlagSet(),

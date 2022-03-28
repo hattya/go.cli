@@ -1,7 +1,7 @@
 //
 // go.cli :: cli_test.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2022 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -12,7 +12,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"reflect"
 	"strconv"
@@ -25,8 +24,8 @@ import (
 
 func TestCLI(t *testing.T) {
 	app := cli.NewCLI()
-	app.Stdout = ioutil.Discard
-	app.Stderr = ioutil.Discard
+	app.Stdout = io.Discard
+	app.Stderr = io.Discard
 	switch err := app.Run([]string{"-cli"}).(type) {
 	case cli.FlagError:
 		if !strings.Contains(err.Error(), "not defined") {
@@ -110,8 +109,8 @@ func TestCLIOut(t *testing.T) {
 
 func TestInterrupt(t *testing.T) {
 	app := cli.NewCLI()
-	app.Stdout = ioutil.Discard
-	app.Stderr = ioutil.Discard
+	app.Stdout = io.Discard
+	app.Stderr = io.Discard
 
 	app.Interrupt()
 	switch err := app.Run(nil).(type) {
@@ -207,8 +206,8 @@ func TestPassword(t *testing.T) {
 
 func TestPrepare(t *testing.T) {
 	app := cli.NewCLI()
-	app.Stdout = ioutil.Discard
-	app.Stderr = ioutil.Discard
+	app.Stdout = io.Discard
+	app.Stderr = io.Discard
 	app.Prepare = func(ctx *cli.Context, cmd *cli.Command) error {
 		cmd.Data = cmd.Data.(int) + 1
 		return nil

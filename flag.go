@@ -1,7 +1,7 @@
 //
 // go.cli :: flag.go
 //
-//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2022 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -11,7 +11,7 @@ package cli
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"sort"
 	"strings"
@@ -98,7 +98,7 @@ type FlagSet struct {
 
 func NewFlagSet() *FlagSet {
 	fs := &FlagSet{vars: make(map[string]*Flag)}
-	fs.fs.SetOutput(ioutil.Discard)
+	fs.fs.SetOutput(io.Discard)
 	return fs
 }
 
@@ -135,7 +135,7 @@ func (fs *FlagSet) Reset() {
 	parsed := fs.fs.Parsed()
 	if parsed {
 		fs.fs = flag.FlagSet{}
-		fs.fs.SetOutput(ioutil.Discard)
+		fs.fs.SetOutput(io.Discard)
 	}
 	for _, f := range fs.list {
 		if parsed {

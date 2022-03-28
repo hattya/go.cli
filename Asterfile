@@ -11,7 +11,7 @@ aster.title(title);
 aster.watch(/.+\.go$/, function() {
   go.mod.tidy();
   try {
-    if (go.test('-v', '-race', '-covermode', 'atomic', '-coverprofile', 'cover.out')) return;
+    if (go.test('-v', '-race', '-coverprofile', 'cover.out')) return;
   } finally {
     aster.title(title);
   }
