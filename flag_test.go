@@ -1,7 +1,7 @@
 //
 // go.cli :: flag_test.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2022 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -10,7 +10,6 @@ package cli_test
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"testing"
@@ -44,13 +43,8 @@ func TestFlagSet(t *testing.T) {
 		envVar("var"):      "var",
 	}
 	for k, v := range environ {
-		os.Setenv(k, v)
+		t.Setenv(k, v)
 	}
-	defer func() {
-		for k := range environ {
-			os.Setenv(k, "")
-		}
-	}()
 
 	flags := cli.NewFlagSet()
 	flags.BoolEnv(envVar("bool"), "bool", false, "")
@@ -115,8 +109,7 @@ func TestAddFlags(t *testing.T) {
 		EnvVar: "__CLI_VAR__",
 	}
 
-	os.Setenv(f.EnvVar, "var")
-	defer os.Setenv(f.EnvVar, "")
+	t.Setenv(f.EnvVar, "var")
 
 	flags := cli.NewFlagSet()
 	flags.Add(f)
@@ -177,8 +170,7 @@ func TestResetFlags(t *testing.T) {
 		return fmt.Sprintf("__CLI_%v__", strings.ToUpper(s))
 	}
 
-	os.Setenv(envVar("int"), "-2")
-	defer os.Setenv(envVar("int"), "")
+	t.Setenv(envVar("int"), "-2")
 
 	type test struct {
 		name  string
