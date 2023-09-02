@@ -4,7 +4,6 @@ A command line interface framework.
 
 [![pkg.go.dev](https://pkg.go.dev/badge/github.com/hattya/go.cli)](https://pkg.go.dev/github.com/hattya/go.cli)
 [![GitHub Actions](https://github.com/hattya/go.cli/actions/workflows/ci.yml/badge.svg)](https://github.com/hattya/go.cli/actions/workflows/ci.yml)
-[![Semaphore](https://semaphoreci.com/api/v1/hattya/go-cli/branches/master/badge.svg)](https://semaphoreci.com/hattya/go-cli)
 [![Appveyor](https://ci.appveyor.com/api/projects/status/fwccrp8kt0g2mhik/branch/master?svg=true)](https://ci.appveyor.com/project/hattya/go-cli)
 [![Codecov](https://codecov.io/gh/hattya/go.cli/branch/master/graph/badge.svg)](https://codecov.io/gh/hattya/go.cli)
 
