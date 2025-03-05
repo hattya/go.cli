@@ -11,7 +11,7 @@ A command line interface framework.
 ## Installation
 
 ```console
-$ go get -u github.com/hattya/go.cli
+$ go get github.com/hattya/go.cli
 ```
 
 

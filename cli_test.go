@@ -1,7 +1,7 @@
 //
 // go.cli :: cli_test.go
 //
-//   Copyright (c) 2014-2022 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -52,7 +52,7 @@ func TestCLI(t *testing.T) {
 	if g, e := len(ctx.Args), 2; g != e {
 		t.Errorf("len(Context.Args) = %v, expected %v", g, e)
 	}
-	for i := 0; i < len(ctx.Args); i++ {
+	for i := range len(ctx.Args) {
 		if g, e := ctx.Args[i], strconv.FormatInt(int64(i), 10); g != e {
 			t.Errorf("Context.Args[%v] = %v, expected %v", i, g, e)
 		}
@@ -325,19 +325,15 @@ func testOut(g, e string) error {
 }
 
 func testStrings(get func(int) string, e []string) (err error) {
+	ok := true
 	g := make([]string, len(e))
-	i := 0
-	for ; i < len(e); i++ {
+	for i := range len(e) {
 		g[i] = get(i)
 		if g[i] != e[i] {
-			break
+			ok = false
 		}
-
 	}
-	if i < len(e) {
-		for ; i < len(e); i++ {
-			g[i] = get(i)
-		}
+	if !ok {
 		err = fmt.Errorf("expected %v, got %v", e, g)
 	}
 	return

@@ -1,7 +1,7 @@
 //
 // go.cli :: flag_test.go
 //
-//   Copyright (c) 2014-2022 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -74,7 +74,7 @@ func TestFlagSet(t *testing.T) {
 	if g, e := flags.NArg(), 2; g != e {
 		t.Errorf("len(FlagSet.NArg()) = %v, expected %v", g, e)
 	}
-	for i := 0; i < flags.NArg(); i++ {
+	for i := range flags.NArg() {
 		if g, e := flags.Arg(i), strconv.FormatInt(int64(i), 10); g != e {
 			t.Errorf("FlagSet.Arg(%v) = %v, expected %v", i, g, e)
 		}
