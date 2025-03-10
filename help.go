@@ -1,7 +1,7 @@
 //
 // go.cli :: help.go
 //
-//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -131,7 +131,7 @@ func flags(fs *FlagSet) []*Flag {
 
 func FormatUsage(ctx *Context) []string {
 	var cmd *Command
-	var u interface{}
+	var u any
 	if len(ctx.Stack) > 0 {
 		cmd = ctx.Stack[len(ctx.Stack)-1]
 		u = cmd.Usage

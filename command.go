@@ -1,7 +1,7 @@
 //
 // go.cli :: command.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -16,13 +16,13 @@ import (
 
 type Command struct {
 	Name   []string
-	Usage  interface{}
+	Usage  any
 	Desc   string
 	Epilog string
 	Cmds   []*Command
 	Flags  *FlagSet
 	Action func(*Context) error
-	Data   interface{}
+	Data   any
 }
 
 func (c *Command) Run(ctx *Context) error {

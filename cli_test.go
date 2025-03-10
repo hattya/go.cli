@@ -63,7 +63,7 @@ func TestCLI(t *testing.T) {
 	for _, tt := range []struct {
 		name string
 		fn   reflect.Value
-		val  interface{}
+		val  any
 	}{
 		{"bool", reflect.ValueOf(ctx.Bool), true},
 		{"duration", reflect.ValueOf(ctx.Duration), 1 * time.Millisecond},
@@ -348,5 +348,5 @@ func (f *value) Set(v string) error {
 	return nil
 }
 
-func (f *value) Get() interface{} { return f.s }
-func (f *value) String() string   { return fmt.Sprintf("%v", f.s) }
+func (f *value) Get() any       { return f.s }
+func (f *value) String() string { return fmt.Sprintf("%v", f.s) }

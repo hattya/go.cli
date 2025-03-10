@@ -20,7 +20,7 @@ import (
 
 func TestFlagSet(t *testing.T) {
 	envVar := func(s string) string { return fmt.Sprintf("__CLI_%v__", strings.ToUpper(s)) }
-	values := map[string]interface{}{
+	values := map[string]any{
 		"bool":     true,
 		"duration": 1 * time.Millisecond,
 		"float64":  3.14,
@@ -174,7 +174,7 @@ func TestResetFlags(t *testing.T) {
 
 	type test struct {
 		name  string
-		value interface{}
+		value any
 	}
 
 	flags := cli.NewFlagSet()
@@ -260,7 +260,7 @@ func TestSortFlags(t *testing.T) {
 
 func TestChoiceFlag(t *testing.T) {
 	flags := cli.NewFlagSet()
-	flags.Choice("c, choice", 0, map[string]interface{}{
+	flags.Choice("c, choice", 0, map[string]any{
 		"foo":    1,
 		"bar":    2,
 		"baz":    3,
@@ -294,7 +294,7 @@ func TestChoiceFlag(t *testing.T) {
 
 func TestPrefixChoiceFlag(t *testing.T) {
 	flags := cli.NewFlagSet()
-	flags.PrefixChoice("c, choice", 0, map[string]interface{}{
+	flags.PrefixChoice("c, choice", 0, map[string]any{
 		"foo":    1,
 		"bar":    2,
 		"baz":    3,

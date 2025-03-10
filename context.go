@@ -1,7 +1,7 @@
 //
 // go.cli :: context.go
 //
-//   Copyright (c) 2014-2021 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -21,7 +21,7 @@ type Context struct {
 	Cmds  []*Command
 	Flags *FlagSet
 	Args  []string
-	Data  interface{}
+	Data  any
 }
 
 func NewContext(ui *CLI) *Context {
@@ -93,7 +93,7 @@ func (ctx *Context) Uint64(name string) uint64 {
 	return ctx.Flags.Get(name).(uint64)
 }
 
-func (ctx *Context) Value(name string) interface{} {
+func (ctx *Context) Value(name string) any {
 	return ctx.Flags.Get(name)
 }
 

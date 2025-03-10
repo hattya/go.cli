@@ -1,7 +1,7 @@
 //
 // go.cli :: flag.go
 //
-//   Copyright (c) 2014-2022 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -117,7 +117,7 @@ func (fs *FlagSet) MetaVar(name, metaVar string) error {
 
 func (fs *FlagSet) Set(name, value string) error { return fs.error(fs.fs.Set(name, value)) }
 
-func (fs *FlagSet) Get(name string) interface{} {
+func (fs *FlagSet) Get(name string) any {
 	if f := fs.Lookup(name); f != nil {
 		return f.Value.Get()
 	}
@@ -292,11 +292,11 @@ func (fs *FlagSet) Uint64Env(envVar, name string, value uint64, usage string) *F
 	})
 }
 
-func (fs *FlagSet) Choice(name string, value interface{}, choices map[string]interface{}, usage string) *Flag {
+func (fs *FlagSet) Choice(name string, value any, choices map[string]any, usage string) *Flag {
 	return fs.ChoiceEnv("", name, value, choices, usage)
 }
 
-func (fs *FlagSet) ChoiceEnv(envVar, name string, value interface{}, choices map[string]interface{}, usage string) *Flag {
+func (fs *FlagSet) ChoiceEnv(envVar, name string, value any, choices map[string]any, usage string) *Flag {
 	c := &choiceValue{
 		value:   value,
 		choices: choices,
@@ -304,11 +304,11 @@ func (fs *FlagSet) ChoiceEnv(envVar, name string, value interface{}, choices map
 	return fs.VarEnv(envVar, name, c, usage)
 }
 
-func (fs *FlagSet) PrefixChoice(name string, value interface{}, choices map[string]interface{}, usage string) *Flag {
+func (fs *FlagSet) PrefixChoice(name string, value any, choices map[string]any, usage string) *Flag {
 	return fs.PrefixChoiceEnv("", name, value, choices, usage)
 }
 
-func (fs *FlagSet) PrefixChoiceEnv(envVar, name string, value interface{}, choices map[string]interface{}, usage string) *Flag {
+func (fs *FlagSet) PrefixChoiceEnv(envVar, name string, value any, choices map[string]any, usage string) *Flag {
 	c := &choiceValue{
 		value:   value,
 		choices: choices,
@@ -318,13 +318,13 @@ func (fs *FlagSet) PrefixChoiceEnv(envVar, name string, value interface{}, choic
 }
 
 type choiceValue struct {
-	value   interface{}
-	choices map[string]interface{}
+	value   any
+	choices map[string]any
 	prefix  bool
 }
 
 func (c *choiceValue) Set(s string) (err error) {
-	m := make(map[string]interface{})
+	m := make(map[string]any)
 	// exact match
 	for k, v := range c.choices {
 		if s == k {
@@ -357,7 +357,7 @@ func (c *choiceValue) Set(s string) (err error) {
 	return
 }
 
-func (c *choiceValue) error(m map[string]interface{}) error {
+func (c *choiceValue) error(m map[string]any) error {
 	list := make(sort.StringSlice, len(m))
 	i := 0
 	for k := range m {
@@ -384,7 +384,7 @@ func (c *choiceValue) error(m map[string]interface{}) error {
 	return FlagError(b.String())
 }
 
-func (c *choiceValue) Get() interface{} { return c.value }
+func (c *choiceValue) Get() any { return c.value }
 
 func (c *choiceValue) String() string { return fmt.Sprintf("%v", c.value) }
 

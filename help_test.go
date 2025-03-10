@@ -1,7 +1,7 @@
 //
 // go.cli :: help_test.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -87,7 +87,7 @@ var options = strings.TrimSpace(cli.Dedent(`
 `))
 
 var helpTests = []struct {
-	usage  interface{}
+	usage  any
 	desc   string
 	epilog string
 	cmds   []*cli.Command
@@ -232,7 +232,7 @@ func TestHelp(t *testing.T) {
 
 var commandHelpTests = []struct {
 	alias  []string
-	usage  interface{}
+	usage  any
 	desc   string
 	epilog string
 	cmds   []*cli.Command
@@ -323,7 +323,7 @@ func TestCommandHelp(t *testing.T) {
 }
 
 var usageTests = []struct {
-	usage  interface{}
+	usage  any
 	format string
 }{
 	{
@@ -364,7 +364,7 @@ func TestUsagePanic(t *testing.T) {
 
 var metaVarTests = []struct {
 	name    string
-	value   interface{}
+	value   any
 	metaVar string
 	out     string
 }{

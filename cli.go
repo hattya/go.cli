@@ -1,7 +1,7 @@
 //
 // go.cli :: cli.go
 //
-//   Copyright (c) 2014-2020 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -24,7 +24,7 @@ import (
 type CLI struct {
 	Name    string
 	Version string
-	Usage   interface{}
+	Usage   any
 	Desc    string
 	Epilog  string
 	Cmds    []*Command
@@ -122,27 +122,27 @@ func (ui *CLI) Interrupt() {
 	ui.cancel()
 }
 
-func (ui *CLI) Print(a ...interface{}) (int, error) {
+func (ui *CLI) Print(a ...any) (int, error) {
 	return fmt.Fprint(ui.Stdout, a...)
 }
 
-func (ui *CLI) Println(a ...interface{}) (int, error) {
+func (ui *CLI) Println(a ...any) (int, error) {
 	return fmt.Fprintln(ui.Stdout, a...)
 }
 
-func (ui *CLI) Printf(format string, a ...interface{}) (int, error) {
+func (ui *CLI) Printf(format string, a ...any) (int, error) {
 	return fmt.Fprintf(ui.Stdout, format, a...)
 }
 
-func (ui *CLI) Error(a ...interface{}) (int, error) {
+func (ui *CLI) Error(a ...any) (int, error) {
 	return fmt.Fprint(ui.Stderr, a...)
 }
 
-func (ui *CLI) Errorln(a ...interface{}) (int, error) {
+func (ui *CLI) Errorln(a ...any) (int, error) {
 	return fmt.Fprintln(ui.Stderr, a...)
 }
 
-func (ui *CLI) Errorf(format string, a ...interface{}) (int, error) {
+func (ui *CLI) Errorf(format string, a ...any) (int, error) {
 	return fmt.Fprintf(ui.Stderr, format, a...)
 }
 
