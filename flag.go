@@ -1,7 +1,7 @@
 //
 // go.cli :: flag.go
 //
-//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -50,15 +50,14 @@ func (f *Flag) Format(sep string) string {
 	b.WriteString(MetaVar(f))
 	if f.Usage != "" {
 		b.WriteString(sep)
-		s := strings.Replace(f.Usage, "\n", "\n"+sep, -1)
-		if n, pct := f.numVerb(s); n > 0 {
-			if n != pct {
-				fmt.Fprintf(&b, s, f.Default)
-			} else {
-				fmt.Fprintf(&b, s)
-			}
+		if n, pct := f.numVerb(f.Usage); n > 0 && n != pct {
+			fmt.Fprintf(&b, strings.ReplaceAll(f.Usage, "\n", "\n"+sep), f.Default)
 		} else {
-			b.WriteString(s)
+			r := strings.NewReplacer(
+				"\n", "\n"+sep,
+				"%%", "%",
+			)
+			r.WriteString(&b, f.Usage)
 		}
 	}
 	return b.String()

@@ -1,7 +1,7 @@
 //
 // go.cli :: flag_test.go
 //
-//   Copyright (c) 2014-2025 Akinori Hattori <hattya@gmail.com>
+//   Copyright (c) 2014-2026 Akinori Hattori <hattya@gmail.com>
 //
 //   SPDX-License-Identifier: MIT
 //
@@ -159,7 +159,7 @@ func TestFormatFlags(t *testing.T) {
 
 		verb = "\n(default: %v)"
 		f.Usage = usage + verb
-		if g, e := f.Format("\t"), fmt.Sprintf(strings.Replace(s+verb, "\n", "\n\t", -1), f.Name[0], usage, f.Default); g != e {
+		if g, e := f.Format("\t"), fmt.Sprintf(strings.ReplaceAll(s+verb, "\n", "\n\t"), f.Name[0], usage, f.Default); g != e {
 			t.Errorf("expected %q, got %q", e, g)
 		}
 	})
